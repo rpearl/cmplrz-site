@@ -1,0 +1,45 @@
+body {
+	margin: 4em 0;
+	background-color: #ddd;
+	font: normal 18px/25px Palatino, "Palatino Linotype", serif;
+}
+a {
+	color: #06c;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+#page {
+	max-width: 47em;
+	margin: 0 auto;
+	padding: 0 2em;
+}
+
+#header {
+	float: right;
+}
+
+code {
+	font-family: Consolas, Menlo, "Courier New", monospace;
+	font-size: 14px;
+}
+
+.highlight {
+	padding: 0.25em 1.5em;
+	margin: 0 3em;
+	font-family: Consolas, Menlo, "Courier New", monospace;
+	font-size: 14px;
+	line-height: 1.2em;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border-radius: 10px; /* future proofing */
+	-khtml-border-radius: 10px; /* for old Konqueror browsers */
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-weight: normal;
+	font-family: 'OFL Sorts Mill Goudy', 'OFL Sorts Mill Goudy TT', serif;
+}

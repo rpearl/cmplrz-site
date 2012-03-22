@@ -1,0 +1,7 @@
+permalink: date
+pygments: true
+# configuration required for some pages
+
+title: Range Analysis for IonMonkey
+permalink: ':title.html'
+#baseurl: /~rpearl/blog/

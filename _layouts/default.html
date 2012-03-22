@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	  <title>{{ site.title }} - {% if page.title %}{{ page.title }}{% endif %}</title>
+    {% if page.description %}
+    <meta name="description" content="{{ page.description }}" />
+	{% endif %}
+	<link href='http://fonts.googleapis.com/css?family=OFL+Sorts+Mill+Goudy+TT:regular,italic' rel='stylesheet' type='text/css' />
+	<link rel="stylesheet" href="css/main.css" type="text/css" media="screen" />
+	<link rel="stylesheet" href="css/syntax.css" type="text/css" media="screen" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  </head>
+  <body>
+    <div id="page">
+      <div id="header">
+		  <a href="index.html">home</a>
+      </div>
+      <div id="body">
+        {% if page.title %}<h1>{{ page.title }}</h1>{% endif %}
+        {{ content }}
+      </div>
+    </div>
+  </body>
+</html>
