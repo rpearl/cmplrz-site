@@ -1,0 +1,125 @@
+\documentclass{article}
+%\usepackage{times}
+\usepackage{url}
+\usepackage{amsmath,amsthm,amssymb,color}
+%\usepackage{multicol}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+%\usepackage[all]{hypcap}
+
+\begin{document}
+
+\title{\bf Range Analysis for IonMonkey}
+
+\author{
+Ryan Pearl\\
+\texttt{$<$rpearl@andrew.cmu.edu$>$}\\
+\and
+Michael Sullivan\\
+\texttt{$<$mjsulliv@andrew.cmu.edu$>$}\\
+}
+
+\maketitle
+
+\section{Introduction}
+We propose implementing and evaluating range analysis for IonMonkey,
+an optimizing JIT compiler for Javascript. Range analysis is
+particularly useful in this context: in addition to taking advantage
+of the analysis results to eliminate redundant comparisons and
+bounds-checks, Javascript's dynamic semantics requires that all
+numeric computations are floating point arithmetic.  This is slow, so
+numbers that can be stored as integers are, and arithmetic operations
+are guarded against overflow into their floating point
+representation. With range analysis, we can prove these guards
+unnecessary and emit higher-quality code.
+\section{Project Tracking}
+As IonMonkey is an open-source project built by the Mozilla
+Corporation, we will use the range analysis tracking bug as our
+project page. This will allow discussion from other contributors to
+the Javascript engine to be integrated into our project page. The
+tracking bug for range analysis is:
+\\ \url{https://bugzilla.mozilla.org/show_bug.cgi?id=699883}.
+
+\section{Project Goals}
+Our goal is to provide an implementation of range analysis and use the
+results to implement two of the potential optimizations we discussed
+(eliminating bounds checks, redundant comparisons, and overflow
+guards). If progress appears to be too slow, we still hope to complete
+range analysis integrate it into the compiler, and maybe implement one
+of the optimizations. If our project proceeds faster than expected, we
+can implement more optimizations that take advantage of this analysis
+or begin to implement other related analysis phases for IonMonkey.
+
+\section{Logistics}
+\subsection{Schedule}
+\begin{itemize}
+\item \textbf{Weeks 1 - 2}:\\
+\textit{Research}.
+We will go over the various algorithms available for range analysis
+and weigh their advantages. In particular, we must take care to
+consider the time complexity of our selected algorithm since JIT
+compilation must run more quickly than ahead-of-time compilation. At
+this point we will be able to see if we can gain any advantage by
+using the runtime knowledge available to a JIT compiler.
+\item \textbf{Week 2}:\\
+\textit{Source-diving}.
+IonMonkey is a large code-base and must interact with Firefox's
+Javascript runtime and interpreter. While these components are
+well-isolated, some source-diving will be necessary to understand the
+context of the JIT.
+
+\item \textbf{Weeks 2 - 4}:\\
+\textit{Implement analysis}.
+Implementing a range analysis phase on the IonMonkey IL and running it
+on a body of Javascript code to get an idea of what optimizations are
+likely to be most effectively exposed by the information we are
+gathering.
+
+\item \textbf{Weeks 4 - 5}:\\
+\textit{Implement optimizations}.
+
+Implementing some optimizations that take advantage of range information (such
+as eliminating bounds checks, redundant comparisons, and overflow guards)
+and testing against the large Javascript test-suite and fuzzer.
+
+\item \textbf{Weeks 5 - 6}:\\
+\textit{Evaluation and wrap-up}.
+
+There are several large Javascript benchmarking suites available to
+measure the impact of our optimization on the x86, x86\_64, and ARM
+architectures. Since one of the other groups is apparently working on
+building a new Javascript benchmark suite, we could maybe also try
+their benchmark suite.
+
+\end{itemize}
+\subsection{Milestones}
+By April 19th, roughly the halfway-point of the project, we hope to be
+code complete on the analysis phase of the optimization. At this
+point, we will begin working on using these analysis results to
+optimize code.
+
+\subsection{Literature Search}
+We have looked at a few papers on range analysis, such as ``The Design
+and Implementation of a Non-Iterative Range Analysis Algorithm on a
+Production Compiler'', by Teixeira and Pereira, which is a practical
+implementation of ``A class of polynomially solvable range
+constraints for interval analysis without widenings.'' by Su and Wagner. The
+algorithm due to Su and Wagner is non-iterative, and works by solving a
+constraint graph. Other range analyses, generally formulated as a more
+traditional iterative dataflow problem, are also available.
+
+\subsection{Resources Needed}
+The software we need is just the IonMonkey code base and a handful of
+freely available benchmark suites. We both have good, modern computers
+to run tests on.
+
+\subsection{Getting Started}
+So far, we have done some looking over papers and considerations of
+what algorithms to use. Both of us have worked on the Javascript team
+at Mozilla, and one of us has worked on IonMonkey, so we should have a
+leg up in diving into the engine source. We don't have anything preventing us
+from starting immediately.
+
+\end{document}
