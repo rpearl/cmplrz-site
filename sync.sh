@@ -1,4 +1,4 @@
 #!/bin/sh
 
 jekyll
-rsync -vaz --exclude='*.sh' _site/ cmplrz@www.endofunctor.org:~/public_html/
+rsync -vaz --exclude='*.sh' --exclude='project-writings/*' _site/ cmplrz@www.endofunctor.org:~/public_html/
