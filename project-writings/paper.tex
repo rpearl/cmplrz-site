@@ -25,17 +25,36 @@ Michael Sullivan\\
 \maketitle
 
 \section{Introduction}
-%% XXX: FIXME, TODO
-We propose implementing and evaluating range analysis for IonMonkey,
-an optimizing JIT compiler for Javascript. Range analysis is
-particularly useful in this context: in addition to taking advantage
-of the analysis results to eliminate redundant comparisons and
-bounds-checks, Javascript's dynamic semantics requires that all
-numeric computations are floating point arithmetic.  This is slow, so
-numbers that can be stored as integers are, and arithmetic operations
-are guarded against overflow into their floating point
-representation. With range analysis, we can prove these guards
-unnecessary and emit higher-quality code.
+With the explosion of browser based applications that has occured in
+recent years, Javascript has become one of the most widely used
+programming languages, and Javascript performance has become
+critically important. Unfortunately, Javascript seems to be designed
+to be un-performant.
+
+One source of these woes are Javascript's dynamic semantics for
+numbers: all numeric values are defined by the specification to be
+IEEE 754 double precision floating point values (with bitwise
+operations being defined to round to the nearest 32 bit integer before
+performing the operation). Since the common case is that numeric
+values are integers and because floating point operations are
+more expensive, all major Javascript implementations attempt to
+represent numbers as integers when possible.
+
+In IonMonkey, Mozilla's next-generation optimizing Javascript JIT
+compiler, an approximate type inference system is used to generate
+type-specialized code for the common case of integer arithmetic, and
+type guards are inserted if the type inferencer is not certain. The
+catch is that since double precision floats have a larger range than
+32-bit integers, if the integer operations would overflow the result
+must be promoted to being stored in a double. IonMonkey deals with
+this by inserting overflow checks after arithmetic operations and
+bailing out of the type specialized code if they trip. While this is
+sometimes actually necessary, it is frequently the case that overflow
+is not possible.
+
+We have implemented integer value range analysis in the IonMonkey
+engine and used it to eliminate provably unnecessary overflow checks.
+
 
 
 \section{Related Work}
