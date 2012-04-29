@@ -54,7 +54,18 @@ is not possible.
 
 We have implemented integer value range analysis in the IonMonkey
 engine and used it to eliminate provably unnecessary overflow checks.
+We implemented an SSA-based worklist range analysis algorithm that
+propagates integer ranges for variables by performing range
+arithmetic. The algorithm is based off of Gough and Klaeren's range
+analysis for bounds check elimination
+\cite{Gough94eliminatingrange}. A range (including information about
+possible overflow) is associated with each computation, and the ranges
+are consulted to determine whether to perform overflow checks for
+arithmetic computations.
 
+OTHER OPTIMIZATIONS WE DO
+
+OUR CONTRIBUTIONS
 
 
 \section{Related Work}
