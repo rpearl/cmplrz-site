@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage{fullpage}
+%\usepackage{times}
+\usepackage{url}
+\usepackage{amsmath,amsthm,amssymb,color}
+%\usepackage{multicol}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+%\usepackage[all]{hypcap}
+
+\begin{document}
+
+\title{\bf Range Analysis for the IonMonkey JavaScript engine}
+
+\author{
+Ryan Pearl\\
+\texttt{$<$rpearl@andrew.cmu.edu$>$}\\
+\and
+Michael Sullivan\\
+\texttt{$<$mjsulliv@cs.cmu.edu$>$}\\
+}
+
+\maketitle
+
+\section{Introduction}
+%% XXX: FIXME, TODO
+We propose implementing and evaluating range analysis for IonMonkey,
+an optimizing JIT compiler for Javascript. Range analysis is
+particularly useful in this context: in addition to taking advantage
+of the analysis results to eliminate redundant comparisons and
+bounds-checks, Javascript's dynamic semantics requires that all
+numeric computations are floating point arithmetic.  This is slow, so
+numbers that can be stored as integers are, and arithmetic operations
+are guarded against overflow into their floating point
+representation. With range analysis, we can prove these guards
+unnecessary and emit higher-quality code.
+
+
+\section{Related Work}
+%% XXX: FIXME, TODO
+We have looked at a few papers on range analysis, such as ``The Design
+and Implementation of a Non-Iterative Range Analysis Algorithm on a
+Production Compiler'', by Teixeira and Pereira, which is a practical
+implementation of an algorithm designed by by Su and Wagner
+\cite{Su04aclass}. The algorithm due to Su and Wagner is
+non-iterative, and works by solving a constraint graph. Other range
+analyses, generally formulated as a more traditional iterative
+dataflow problem, are also available.
+
+We reviewed the literature on different types of range analysis and
+decided to implement an analysis based on Gough and Klaeren's SSA
+based range analysis algorithm \cite{Gough94eliminatingrange}.
+
+\section{Implementation}
+%% XXX: TODO
+
+\section{Evaluation}
+%% XXX: TODO
+
+\section{Surprises and Lessons Learned}
+%% XXX: TODO
+
+\section{Conclusions}
+%% XXX: TODO
+Boy, JS is a pain in the ass.
+
+\bibliography{citations}{}
+\bibliographystyle{abbrv}
+
+
+\end{document}

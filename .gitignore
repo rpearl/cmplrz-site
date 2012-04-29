@@ -5,3 +5,5 @@ _site
 *.log
 *.out
 *.pdf
+*.bbl
+*.blg
