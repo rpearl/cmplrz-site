@@ -254,6 +254,45 @@ advantage of data structures common to modern SSA based compilers.
   could not claim with a straight face that we ``developed an
   algorithm'' to perform it.} 
 
+
+\begin{figure}[ht]
+\begin{center}
+\begin{verbatim}
+function addBetaNodesToFunc(cfg):
+  for each b in cfg.basic-blocks():
+    if b.numPredecessors() == 1 and isBranch(b.pred(0).lastInstruction())
+      test = b.pred(0).lastInstruction()
+      # find whether we are the true or false branch
+      direction = (b == test.trueTarget())
+      if test is of the form <x RELOP c>:
+          r = computeRange(RELOP, c, direction)
+          x' = b.insertFront(<Beta(x, r)>)
+          replaceDominatedUses(x, x')
+
+# Replace all uses of the instruction x that are dominated by
+# the instruction x' with x'
+function replaceDominatedUses(x, x'):
+  for each use in x.uses():
+    ins = use.instruction()
+    if ins != x' and isDominatedUse(x', use):
+      replaceUseWith(use, x')
+
+function isDominatedUse(x', use):
+  ins = use.instruction()
+  if ins.isPhiNode():
+    # Get the predecessor block that corresponds to the
+    # argument of the phi node we are looking at
+    phi-arg-pred-block = ins.block().pred(use.index())
+    return blockDominates(x'.block(), phi-arg-pred-block)
+  else:
+    return blockDominates(x'.block(), x.block())
+\end{verbatim}
+\end{center}
+\caption{Algorithm for inserting beta nodes}
+\label{fig:add_betas}
+\end{figure}
+
+
 \subsection{Range Analysis}
 
 \begin{figure}[ht]
