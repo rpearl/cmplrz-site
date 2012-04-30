@@ -68,9 +68,32 @@ possible overflow) is associated with each computation, and the ranges
 are consulted to determine whether to perform overflow checks for
 arithmetic computations.
 
-OTHER OPTIMIZATIONS WE DO
+OTHER OPTIMIZATIONS WE DO??
 
-OUR CONTRIBUTIONS
+The core of our analysis system is essentially an implementation of
+Gough and Klaeren's static range analysis algorithm for bounds check
+elimination.
+We identify our technical contributions as:
+\begin{itemize}
+\item An implementation of Gough and Klaeren's range analysis in a
+  modern industrial-strength SSA-based compiler.
+\item A different algorithm for inserting and removing $\beta$ nodes
+  that used by Gough and Klaeren that takes advantage of the data
+  structures of a modern SSA compiler.
+\item To facilitate the above, extended IonMonkey with a fast
+  (constant time, one integer per basic block memory overhead) 
+  mechanism for determining whether a block is dominated by another.
+\item Extending the analysis to produce the information needed for
+  overflow check elimination by differentiating between
+  ``maximum/minimum 32-bit int values'' and ``infinity'' (possible
+  overflow).
+\item The observation that when doing range computation with the above
+  distinction, the input ranges can be always be ``squashed'' to only
+  finite ranges, since if overflow had occured, the code would have
+  bailed out.
+\item An implementation of overflow check elimination using the above
+  analyses.
+\end{itemize}
 
 
 \section{Related Work}
@@ -89,6 +112,19 @@ decided to implement an analysis based on Gough and Klaeren's SSA
 based range analysis algorithm \cite{Gough94eliminatingrange}.
 
 \section{IonMonkey Overview}
+
+\section{Implementation}
+%% XXX: TODO
+
+\subsection{Ranges and Range Arithmetic}
+
+In Single Static Assignment form, each computation has a distinct
+name. We take advantage of this to assign each name (that is, each
+computation) a ``range''; the ranges in our system are a contiguous
+subset of the set ${-\infty} \cup [-2^{31}, 2^{31}-1] \cup {\infty}$
+that represent the possible results a computation may have. A range
+that includes $\pm \infty$ indicates that the associated
+computation may overflow in that direction.
 
 \begin{figure}[ht]
 \begin{eqnarray*}
@@ -114,7 +150,83 @@ $\Clamp ([$&$\min(x_l \x y_l, x_l \x y_h, x_h \x y_l, x_h \x y_h),$\\
 \label{fig:range_arith}
 \end{figure}
 
+We can define arithmetical and set operations on these ranges in the
+standard way, ``clamping'' values outside the range of a 32-bit signed
+integer to $\pm \infty$. Some definitions for this are are shown in
+Figure \ref{fig:range_arith}.
 
+\subsection{Conditional Branches and $\beta$ nobes}
+
+An important source of range information that requires care to take
+advantage of is conditional branches. Consider the code in Figure
+\ref{fig:branch}. All three arithmetic operations in this code can be
+proven to not overflow, but to do this it is not sufficient to simply
+associate each name with a range, since the information differs
+between basic blocks. An obvious approach is to instead associate
+ranges with name/basic block pairs, allowing representation of
+flow-sensitive range information. This solution, however, is
+unsatisfying. One of the major benefits of SSA-style analysis is
+eliminating the need for this sort of tracking; by giving each
+computation a unique name, SSA reduces the need for tracking
+information about variables across time; adopting this approach would
+undo this.
+
+The approach we took, again following \cite{Gough94eliminatingrange},
+is to instead attack the problem in ``SSA style'', by introducing
+$\beta$-nodes, a new form of pseudo-operation that associates range
+information with a value. $\beta$ nodes take one argument and
+additionall have an auxillary constant range associated with
+them. Operationally, $\beta$-nodes are simply copies, but the
+invariant is maintained that the output value will fall inside the
+range given by the $\beta$ node. Gough and Klaeren refer to SSA
+extended with $\beta$ nodes as XSA.
+
+\begin{figure}[ht]
+\begin{center}
+\begin{verbatim}
+var y;
+if (x < 0) {
+    y = x + 2000000000;
+} else {
+    if (x < 1000000000) {
+        y = x*2;
+    } else {
+        y = x - 3000000000;
+    }
+}
+\end{verbatim}
+\end{center}
+\caption{Code that requires information about branches to properly analyze}
+\label{fig:branch}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\begin{verbatim}
+if (x < 0) {
+    x1 = Beta(x, [INT_MIN, -1]);
+    y1 = x1 + 2000000000;
+} else {
+    x2 = Beta(x, [0, INT_MAX]);
+    if (x2 < 1000000000) {
+        x3 = Beta(x2, [INT_MIN, 999999999]);
+        y2 = x3*2;
+    } else {
+        x4 = Beta(x2, [1000000000, INT_MAX]);
+        y3 = x4 - 3000000000;
+    }
+    y4 = Phi(y2, y3);
+}
+y = Phi(y1, y4);
+\end{verbatim}
+\end{center}
+\caption{Code from Figure \ref{fig:branch}, in XSA form}
+\label{fig:xsa}
+\end{figure}
+
+
+
+\subsection{Range Analysis}
 
 \begin{figure}[ht]
 \begin{eqnarray*}
@@ -133,6 +245,7 @@ x = \beta(y, [l, h]) &\Rightarrow& \Range(x) = \Squash(\Range(y)) \cap [l, h] \\
 x = y + z &\Rightarrow& \Range(x) = \Squash(\Range(y)) + \Squash(\Range(z)) \\
 x = y - z &\Rightarrow& \Range(x) = \Squash(\Range(y)) - \Squash(\Range(z)) \\
 x = y \x z &\Rightarrow& \Range(x) = \Squash(\Range(y)) \x \Squash(\Range(z)) \\
+x = c &\Rightarrow& \Range(x) = [c, c] \\
 \end{eqnarray*}
 
 
@@ -140,9 +253,6 @@ x = y \x z &\Rightarrow& \Range(x) = \Squash(\Range(y)) \x \Squash(\Range(z)) \\
 \label{fig:range_anal}
 \end{figure}
 
-
-\section{Implementation}
-%% XXX: TODO
 
 \section{Evaluation}
 %% XXX: TODO
