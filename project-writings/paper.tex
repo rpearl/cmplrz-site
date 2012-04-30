@@ -318,6 +318,11 @@ function blockDominates(b1, b2):
 \label{fig:add_betas}
 \end{figure}
 
+The method for removing beta nodes is trivial. Traverse the program
+removing beta nodes and replacing all uses of them with their
+arguments. Since beta nodes only are placed at the beginning of basic
+blocks, we only need to iterate through the $\beta$ node prefix of a
+block.
 
 \subsection{Range Analysis}
 
