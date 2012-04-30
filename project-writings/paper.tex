@@ -224,7 +224,35 @@ y = Phi(y1, y4);
 \label{fig:xsa}
 \end{figure}
 
+\subsection{Inserting and Removing Beta Nodes}
+To put programs in XSA form, Gough and Klaeren presented an extension
+to Cytron et al.'s standard algorithm for computing SSA form using
+dominance frontiers \cite{Cytron:1991:ECS:115372.115320}.
 
+This approach does not work for us for two reasons: first, IonMonkey
+does not use Cytron et al.'s algorithm for computing SSA form; it
+instead takes advantage of the structured nature of Javascript code to
+go to SSA form without computing dominance frontiers \footnote{More
+  precisely, it takes advantage in an ad-hoc and terrifying way of
+  poorly documented structured invariants and ``source notes'' in the
+  bytecode that the SpiderMonkey frontend emits.}.  Furthermore, we
+decided that instead of putting the program into XSA form at the
+beginning and leaving it there through the compilation phase, it would
+be a better idea to introduce $\beta$ nodes solely for performing
+range analysis and remove them afterwards. This is for two main
+reasons: first, as a question of engineering effort, we did not want
+to teach every pass of the compiler how to deal with $\beta$ nodes,
+and the IonMonkey team does not want us to change the IL in a pervasive
+way simply for range analysis; second, $\beta$ nodes are copies that
+are not allowed to be propagated away, which may inhibit optimization
+passes (like global value numbering).
+
+Thus we developed a quite simple and in practice efficient algorithm to
+add $\beta$ nodes to an SSA source program by taking
+advantage of data structures common to modern SSA based compilers.
+\footnote{The method for removing $\beta$ nodes is so trivial that we
+  could not claim with a straight face that we ``developed an
+  algorithm'' to perform it.} 
 
 \subsection{Range Analysis}
 
@@ -245,10 +273,8 @@ x = \beta(y, [l, h]) &\Rightarrow& \Range(x) = \Squash(\Range(y)) \cap [l, h] \\
 x = y + z &\Rightarrow& \Range(x) = \Squash(\Range(y)) + \Squash(\Range(z)) \\
 x = y - z &\Rightarrow& \Range(x) = \Squash(\Range(y)) - \Squash(\Range(z)) \\
 x = y \x z &\Rightarrow& \Range(x) = \Squash(\Range(y)) \x \Squash(\Range(z)) \\
-x = c &\Rightarrow& \Range(x) = [c, c] \\
+x = c &\Rightarrow& \Range(x) = [c, c]
 \end{eqnarray*}
-
-
 \caption{Range analysis equations}
 \label{fig:range_anal}
 \end{figure}
