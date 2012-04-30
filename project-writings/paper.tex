@@ -99,14 +99,18 @@ We identify our technical contributions as:
 
 \section{Related Work}
 %% XXX: FIXME, TODO
-We have looked at a few papers on range analysis, such as ``The Design
+There are a variety of approaches to range analysis. A recent work, ``The Design
 and Implementation of a Non-Iterative Range Analysis Algorithm on a
-Production Compiler'', by Teixeira and Pereira, which is a practical
+Production Compiler'', by Teixeira and Pereira, outlines a practical implementation of
 implementation of an algorithm designed by by Su and Wagner
 \cite{Su04aclass}. The algorithm due to Su and Wagner is
-non-iterative, and works by solving a constraint graph. Other range
-analyses, generally formulated as a more traditional iterative
-dataflow problem, are also available.
+non-iterative, and works by constructing a constraint graph from the program's control flow graph.
+
+A variety of other range analyses are available which formulate the problem as
+a more traditional iterative dataflow problem. GCC, for example, uses an SSA
+workflow algorithm due to Patterson in ``Accurate Static Branch Prediction by
+Value Range Propagation.'' The orignal non-SSA based dataflow algorithm is by
+Harrison in ``Compiler Analysis of the Value Ranges of Variables.''
 
 We reviewed the literature on different types of range analysis and
 decided to implement an analysis based on Gough and Klaeren's SSA
