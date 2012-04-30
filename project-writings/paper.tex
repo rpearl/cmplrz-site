@@ -235,7 +235,7 @@ instead takes advantage of the structured nature of Javascript code to
 go to SSA form without computing dominance frontiers \footnote{More
   precisely, it takes advantage in an ad-hoc and terrifying way of
   poorly documented structured invariants and ``source notes'' in the
-  bytecode that the SpiderMonkey frontend emits.}.  Furthermore, we
+  bytecode that the SpiderMonkey front-end emits.}.  Furthermore, we
 decided that instead of putting the program into XSA form at the
 beginning and leaving it there through the compilation phase, it would
 be a better idea to introduce $\beta$ nodes solely for performing
@@ -258,7 +258,7 @@ flow group, looking for blocks that have been entered by a jump
 conditioned on a relational operation. When we find a variable being
 compared to a constant, we compute a range and use it to create a new
 $\beta$ node. We want to propagate this range information to all uses
-of the variable where the branch is guarenteed to have been taken;
+of the variable where the branch is guaranteed to have been taken;
 this is accomplished by replacing all uses of original instruction
 that are dominated by the new $\beta$ instruction with the $\beta$. To
 do this, we take advantage of IonMonkey's use chains to efficiently
@@ -273,7 +273,7 @@ with a conditional. To do this, we annotated each basic block with its
 index in a pre-order traversal of the dominator tree. Since IonMonkey
 basic blocks already tracked how many other blocks they dominated, we
 can now easily check whether a block dominates another by checking
-whether the potential descendent's index falls within the range of the
+whether the potential descendant's index falls within the range of the
 ancestor's dominated blocks.
 
 \begin{figure}[ht]
