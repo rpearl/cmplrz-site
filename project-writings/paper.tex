@@ -30,7 +30,7 @@ Michael Sullivan\\
 \maketitle
 
 \section{Introduction}
-With the explosion of browser based applications that has occured in
+With the explosion of browser based applications that has occurred in
 recent years, Javascript has become one of the most widely used
 programming languages, and Javascript performance has become
 critically important. Unfortunately, Javascript seems to be designed
@@ -38,7 +38,7 @@ to be un-performant.
 
 One source of these woes are Javascript's dynamic semantics for
 numbers: all numeric values are defined by the specification to be
-IEEE 754 double precision floating point values (with bitwise
+IEEE 754 double precision floating point values (with bit-wise
 operations being defined to round to the nearest 32 bit integer before
 performing the operation). Since the common case is that numeric
 values are integers and because floating point operations are
@@ -89,7 +89,7 @@ We identify our technical contributions as:
   overflow).
 \item The observation that when doing range computation with the above
   distinction, the input ranges can be always be ``squashed'' to only
-  finite ranges, since if overflow had occured, the code would have
+  finite ranges, since if overflow had occurred, the code would have
   bailed out.
 \item An implementation of overflow check elimination using the above
   analyses.
@@ -175,7 +175,7 @@ The approach we took, again following \cite{Gough94eliminatingrange},
 is to instead attack the problem in ``SSA style'', by introducing
 $\beta$-nodes, a new form of pseudo-operation that associates range
 information with a value. $\beta$ nodes take one argument and
-additionall have an auxillary constant range associated with
+additionally have an auxiliary constant range associated with
 them. Operationally, $\beta$-nodes are simply copies, but the
 invariant is maintained that the output value will fall inside the
 range given by the $\beta$ node. Gough and Klaeren refer to SSA
