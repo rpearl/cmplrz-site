@@ -120,6 +120,24 @@ based range analysis algorithm \cite{Gough94eliminatingrange}.
 
 \section{Implementation}
 %% XXX: TODO
+The IonMonkey compiler is somewhat loosely based on LLVM, in that it is an
+imperative SSA compiler. IonMonkey takes the bytecode used by the SpiderMonkey
+Javascript interpreter and compiles it to native code. Optimistic type
+specialization is used, and if type assumptions fail, then execution ``bails
+out'' to the interpreter.
+
+IonMonkey has two intermediate languages. There is a ``Middle Intermediate
+Representation'' which encompasses higher-level constructs such as lambdas,
+objects, and strings. A variety of optimizations are performed, and then the
+code is lowered to a ``Lower Intermediate Representation'' used for register
+allocation and code generation.
+
+While the ECMA specification for Javascript requires that all numbers behave as
+double-precision floating point values, for performance reasons JIT compilers
+represent numbers as 32-bit integers when possible. However, since doubles can
+represent larger values than integers, operations must be guarded against
+overflow.  Our range analysis pass eliminates overflow checks when operations
+can be proven not to overflow.
 
 \subsection{Ranges and Range Arithmetic}
 
