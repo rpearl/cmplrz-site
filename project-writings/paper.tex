@@ -46,7 +46,8 @@ more expensive, all major Javascript implementations attempt to
 represent numbers as integers when possible.
 
 In IonMonkey, Mozilla's next-generation optimizing Javascript JIT
-compiler, an approximate type inference system is used to generate
+compiler, a hybrid type inference system (which uses both static analysis and
+runtime information\cite{BHackettTI}) is used to generate
 type-specialized code for the common case of integer arithmetic, and
 type guards are inserted if the type inferencer is not certain. The
 catch is that since double precision floats have a larger range than
