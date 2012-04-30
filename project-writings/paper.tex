@@ -249,11 +249,32 @@ passes (like global value numbering).
 
 Thus we developed a quite simple and in practice efficient algorithm to
 add $\beta$ nodes to an SSA source program by taking
-advantage of data structures common to modern SSA based compilers.
+advantage of data structures common to modern SSA based compilers
 \footnote{The method for removing $\beta$ nodes is so trivial that we
   could not claim with a straight face that we ``developed an
-  algorithm'' to perform it.} 
+  algorithm'' to perform it.} .  Pseudocode for the algorithm is shown
+in Figure \ref{fig:add_betas}. The algorithm traverses the control
+flow group, looking for blocks that have been entered by a jump
+conditioned on a relational operation. When we find a variable being
+compared to a constant, we compute a range and use it to create a new
+$\beta$ node. We want to propagate this range information to all uses
+of the variable where the branch is guarenteed to have been taken;
+this is accomplished by replacing all uses of original instruction
+that are dominated by the new $\beta$ instruction with the $\beta$. To
+do this, we take advantage of IonMonkey's use chains to efficiently
+iterate over all uses of an instruction.
 
+In order to do this, we needed to be able to efficiently determine
+whether one block is dominated by another. The best way to do that
+that existed in IonMonkey was to walk up the dominator tree looking
+for the block being tested against. We felt that it would be too
+inefficient to need to do this for every use of every variable tested
+with a conditional. To do this, we annotated each basic block with its
+index in a pre-order traversal of the dominator tree. Since IonMonkey
+basic blocks already tracked how many other blocks they dominated, we
+can now easily check whether a block dominates another by checking
+whether the potential descendent's index falls within the range of the
+ancestor's dominated blocks.
 
 \begin{figure}[ht]
 \begin{center}
@@ -286,6 +307,11 @@ function isDominatedUse(x', use):
     return blockDominates(x'.block(), phi-arg-pred-block)
   else:
     return blockDominates(x'.block(), x.block())
+
+function blockDominates(b1, b2):
+  high = b1.domIndex() + b1.numDominated()
+  low  = b1.domIndex()
+  return b2.domIndex() >= low && b2.domIndex <= high
 \end{verbatim}
 \end{center}
 \caption{Algorithm for inserting beta nodes}
