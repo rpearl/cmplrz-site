@@ -7,13 +7,23 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{courier}
 \usepackage{listings}
 %\usepackage[all]{hypcap}
 
 \newcommand{\Squash}{\mathsf{Squash}}
 \newcommand{\Clamp}{\mathsf{Clamp}}
 \newcommand{\Range}{\mathsf{Range}}
+
 \let\x\cdot
+\lstset{
+  language=Python,
+  showstringspaces=false,
+  tabsize=4,
+  basicstyle=\ttfamily,
+  keywordstyle=\bfseries\ttfamily,
+  captionpos=b
+}
 
 \begin{document}
 
@@ -276,7 +286,7 @@ advantage of data structures common to modern SSA based compilers
 \footnote{The method for removing $\beta$ nodes is so trivial that we
   could not claim with a straight face that we ``developed an
   algorithm'' to perform it.} .  Pseudocode for the algorithm is shown
-in Figure \ref{fig:add_betas}. The algorithm traverses the control
+in Listing \ref{lst:add_betas}. The algorithm traverses the control
 flow group, looking for blocks that have been entered by a jump
 conditioned on a relational operation. When we find a variable being
 compared to a constant, we compute a range and use it to create a new
@@ -299,47 +309,43 @@ can now easily check whether a block dominates another by checking
 whether the potential descendant's index falls within the range of the
 ancestor's dominated blocks.
 
-\begin{figure}[ht]
-\begin{center}
-\begin{verbatim}
-function addBetaNodesToFunc(cfg):
-  for each b in cfg.basic-blocks():
-    if b.numPredecessors() == 1 and isBranch(b.pred(0).lastInstruction())
+\begin{lstlisting}[language=Python,
+                   caption={Pseudocode algorithm for inserting beta nodes},
+                   label={lst:add_betas}]
+def addBetaNodesToFunc(cfg):
+  for b in cfg.basic_blocks():
+    if b.numPredecessors() == 1 and isBranch(b.pred(0).lastInstruction()):
       test = b.pred(0).lastInstruction()
       # find whether we are the true or false branch
       direction = (b == test.trueTarget())
-      if test is of the form <x RELOP c>:
-          r = computeRange(RELOP, c, direction)
-          x' = b.insertFront(<Beta(x, r)>)
-          replaceDominatedUses(x, x')
+      if test.op() in RELOPs:
+          r = computeRange(test.op(), c, direction)
+          x_prime = b.insertFront(Beta(x, r))
+          replaceDominatedUses(x, x_prime)
 
 # Replace all uses of the instruction x that are dominated by
-# the instruction x' with x'
-function replaceDominatedUses(x, x'):
+# the instruction x_prime with x_prime
+def replaceDominatedUses(x, x_prime):
   for each use in x.uses():
     ins = use.instruction()
-    if ins != x' and isDominatedUse(x', use):
-      replaceUseWith(use, x')
+    if ins != x_prime and isDominatedUse(x_prime, use):
+      replaceUseWith(use, x_prime)
 
-function isDominatedUse(x', use):
+def isDominatedUse(x_prime, use):
   ins = use.instruction()
   if ins.isPhiNode():
     # Get the predecessor block that corresponds to the
     # argument of the phi node we are looking at
-    phi-arg-pred-block = ins.block().pred(use.index())
-    return blockDominates(x'.block(), phi-arg-pred-block)
+    phi_arg_pred_block = ins.block().pred(use.index())
+    return blockDominates(x_prime.block(), phi_arg_pred_block)
   else:
-    return blockDominates(x'.block(), x.block())
+    return blockDominates(x_prime.block(), x.block())
 
-function blockDominates(b1, b2):
+def blockDominates(b1, b2):
   high = b1.domIndex() + b1.numDominated()
   low  = b1.domIndex()
-  return b2.domIndex() >= low && b2.domIndex <= high
-\end{verbatim}
-\end{center}
-\caption{Algorithm for inserting beta nodes}
-\label{fig:add_betas}
-\end{figure}
+  return b2.domIndex() >= low and b2.domIndex <= high
+\end{lstlisting}
 
 The method for removing beta nodes is trivial. Traverse the program
 removing beta nodes and replacing all uses of them with their
