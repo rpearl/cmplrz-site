@@ -133,11 +133,12 @@ Javascript interpreter and compiles it to native code. Optimistic type
 specialization is used, and if type assumptions fail, then execution ``bails
 out'' to the interpreter.
 
-IonMonkey has two intermediate languages. There is a ``Middle Intermediate
-Representation'' which encompasses higher-level constructs such as lambdas,
-objects, and strings. A variety of optimizations are performed, and then the
-code is lowered to a ``Lower Intermediate Representation'' used for register
-allocation and code generation.
+IonMonkey has two intermediate languages. There is a ``Middle
+Intermediate Representation'' (MIR) which encompasses higher-level
+constructs such as lambdas, objects, and strings. A variety of
+optimizations are performed, and then the code is lowered to a ``Lower
+Intermediate Representation'' (LIR) used for register allocation and
+code generation.
 
 While the ECMA specification for Javascript requires that all numbers behave as
 double-precision floating point values, for performance reasons JIT compilers
@@ -400,6 +401,32 @@ x = c &\Rightarrow& \Range(x) = [c, c]
 \label{fig:range_anal}
 \end{figure}
 
+\subsection{Overflow Check Elimination}
+Overflow check elimination is implemented as part of the lowering pass
+that generates the lower level intermediate representation (LIR) from
+the middle intermediate representation (MIR). During lowering,
+operations that can fail in such a way as to require a bailout have
+``snapshots'' associated with them. During actual code generation,
+instruction-specific checking code (overflow checking, in this case)
+is emitted for operations that can fail and have snapshots associated
+with them.
+
+During lowering of arithmetic operations that can overflow, we check
+whether the instructions range is finite; if it is, we supress
+assigning a snapshot to the operation, eliminating the overflow check.
+
+\subsection{Array Bounds Check Elimination}
+We do not perform general array bounds check elimination. To do this
+fully would require symbolic range analysis. Since IonMonkey already
+does hoisting of bounds checks out of loops, we determined that the
+effort would probably not be worth the gain.
+
+We do eliminate bounds checks in one situation: when bounds checks
+have been hoisted out of a loop, a check is added that specifically
+bounds checks whether a value is greater than the array minimum index
+(which, unfortunately, need not be zero). During lowering we will
+eliminate this check if we can prove that the index is greater than
+the minimum value.
 
 \section{Evaluation}
 %% XXX: TODO
