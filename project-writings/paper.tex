@@ -326,7 +326,7 @@ def addBetaNodesToFunc(cfg):
 # Replace all uses of the instruction x that are dominated by
 # the instruction x_prime with x_prime
 def replaceDominatedUses(x, x_prime):
-  for each use in x.uses():
+  for use in x.uses():
     ins = use.instruction()
     if ins != x_prime and isDominatedUse(x_prime, use):
       replaceUseWith(use, x_prime)
@@ -344,7 +344,7 @@ def isDominatedUse(x_prime, use):
 def blockDominates(b1, b2):
   high = b1.domIndex() + b1.numDominated()
   low  = b1.domIndex()
-  return b2.domIndex() >= low and b2.domIndex <= high
+  return b2.domIndex() >= low and b2.domIndex() <= high
 \end{lstlisting}
 
 The method for removing beta nodes is trivial. Traverse the program
