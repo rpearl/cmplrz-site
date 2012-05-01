@@ -360,9 +360,38 @@ block.
 At the start of range analysis, all ranges are initialized to
 $[-\infty, \infty]$.
 
-XXX: rpearl, explain how the analysis pass works; specifically, when
-we add things to the worklist, because that is different from the
-paper. maybe add pseudocode
+Our algorithm for range analsis is based on the algorithm due to Gough. It
+differs from the paper in a few ways to better fit the architecture of
+IonMonkey. The paper suggests using a dominator tree order, but we found that
+using reverse post-order was better for our purposes: reverse post-order
+traversal is simpler to implement in IonMonkey, and in general definitions are
+still visited before all their uses. There is no issue of correctness since we
+iterate until no range information is changing..
+
+We compute the range of each definition unconditionally once, and add all phi
+nodes and beta nodes to a worklist--the only values which can change are those
+that flow through backedges captured by phis. We then iterate through the
+worklist, recomputing the range of each definition, and add all consumers of
+that definition if the range changed in order to propagate this information.
+
+\begin{lstlisting}[language=Python,
+                   caption={Pseudocode algorithm for propagating range information},
+                   label={lst:propagate_ranges}]
+def propagateRanges(graph):
+    worklist = []
+    for block in reversePostOrder(graph):
+        for insn in block:
+            insn.recomputeRange()
+            if !insn.isPhi() and !insn.isBeta():
+                continue
+            worklist.appendAll(insn.uses())
+
+    while len(worklist) > 0:
+        insn = worklist.pop()
+        #recomputeRange() returns true if the range changed
+        if (insn.recomputeRange()):
+            worklist.appendAll(insn.uses())
+\end{lstlisting}
 
 Recomputation of the possible range of an instruction is fairly simple
 and proceeds by the rules given in Figure \ref{fig:range_anal}. The
