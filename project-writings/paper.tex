@@ -157,7 +157,9 @@ computation) a ``range''; the ranges in our system are a contiguous
 subset of the set ${-\infty} \cup [-2^{31}, 2^{31}-1] \cup {\infty}$
 that represent the possible results a computation may have. A range
 that includes $\pm \infty$ indicates that the associated
-computation may overflow in that direction.
+computation may overflow in that direction. This distinction between
+the minimum/maximum 32-bit integer values and $\pm \infty$ is the key
+to detecting possible overflow.
 
 \begin{figure}[ht]
 \begin{eqnarray*}
@@ -355,10 +357,26 @@ block.
 
 \subsection{Range Analysis}
 
+At the start of range analysis, all ranges are initialized to
+$[-\infty, \infty]$.
 
 XXX: rpearl, explain how the analysis pass works; specifically, when
 we add things to the worklist, because that is different from the
 paper. maybe add pseudocode
+
+Recomputation of the possible range of an instruction is fairly simple
+and proceeds by the rules given in Figure \ref{fig:range_anal}. The
+key insight we had in these equations is that while the ranges of the
+inputs to an operation may be infinite (that is, they may have
+overflowed), this possibility can be ignored when using the ranges as
+inputs. This is because had the computation overflowed, it would have
+been detected and IonMonkey would bail out to non-integer code. We
+know that if code that assumes the input is an integer is still being
+run, then the operation must not have overflowed, and thus must have a
+finite range. What this means for the range analysis equations is that
+we can always ``squash'' the ranges of inputs by replacing positive
+and negative infinite with the maximum and minimum 32-bit integers,
+respectively.
 
 \begin{figure}[ht]
 \begin{eqnarray*}
