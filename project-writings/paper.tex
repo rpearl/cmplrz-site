@@ -320,8 +320,8 @@ def addBetaNodesToFunc(cfg):
       test = b.pred(0).lastInstruction()
       # find whether we are the true or false branch
       direction = (b == test.trueTarget())
-      if test.op() in RELOPs:
-          r = computeRange(test.op(), c, direction)
+      if test matches ``x RELOP c'':
+          r = computeRange(RELOP, c, direction)
           x_prime = b.insertFront(Beta(x, r))
           replaceDominatedUses(x, x_prime)
 
