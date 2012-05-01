@@ -366,13 +366,29 @@ IonMonkey. The paper suggests using a dominator tree order, but we found that
 using reverse post-order was better for our purposes: reverse post-order
 traversal is simpler to implement in IonMonkey, and in general definitions are
 still visited before all their uses. There is no issue of correctness since we
-iterate until no range information is changing..
+iterate until no range information is changing.
 
 We compute the range of each definition unconditionally once, and add all phi
 nodes and beta nodes to a worklist--the only values which can change are those
 that flow through backedges captured by phis. We then iterate through the
 worklist, recomputing the range of each definition, and add all consumers of
 that definition if the range changed in order to propagate this information.
+
+SSA form lets us use a ``sparse'' analysis in which we only recompute
+information that changes. This furthermore means that the runtime of our
+SSA-based algorithm is bounded by the number of loop backedges in the graph: in
+a graph with no back edges, on the second iteration we will discover that no
+range information has changed and terminate the pass.
+
+This method for performing range propagation has the added benefit that at
+every iteration of the algorithm, the range information is correct. Additional
+iterations serve only to yield more information. This is beneficial to
+IonMonkey since there are plans to implement a ``base-line'' compiler which
+performs small, cheap optimizations such as pessimistic global value numbering,
+which runs in a single pass. When code becomes hot, it can be recompiled with
+more expensive optimziations enabled. We will be able to run range analysis for
+a few iterations in the base-line compilation mode, and run to a fixed point
+when performing more aggressive optimization.
 
 \begin{lstlisting}[language=Python,
                    caption={Pseudocode algorithm for propagating range information},
