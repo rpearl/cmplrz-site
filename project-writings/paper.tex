@@ -127,9 +127,6 @@ decided to implement an analysis based on Gough and Klaeren's SSA
 based range analysis algorithm \cite{Gough94eliminatingrange}.
 
 \section{IonMonkey Overview}
-
-\section{Implementation}
-%% XXX: TODO
 The IonMonkey compiler is somewhat loosely based on LLVM, in that it is an
 imperative SSA compiler. IonMonkey takes the bytecode used by the SpiderMonkey
 Javascript interpreter and compiles it to native code. Optimistic type
@@ -148,6 +145,8 @@ represent numbers as 32-bit integers when possible. However, since doubles can
 represent larger values than integers, operations must be guarded against
 overflow.  Our range analysis pass eliminates overflow checks when operations
 can be proven not to overflow.
+
+\section{Implementation}
 
 \subsection{Ranges and Range Arithmetic}
 
