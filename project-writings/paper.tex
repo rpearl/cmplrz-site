@@ -214,7 +214,9 @@ additionally have an auxiliary constant range associated with
 them. Operationally, $\beta$-nodes are simply copies, but the
 invariant is maintained that the output value will fall inside the
 range given by the $\beta$ node. Gough and Klaeren refer to SSA
-extended with $\beta$ nodes as XSA.
+extended with $\beta$ nodes as XSA. These $\beta$ nodes are used to split
+definitions at conditionally taken branches, and augment uses inside the
+branches with range information.
 
 \begin{figure}[ht]
 \begin{center}
