@@ -100,7 +100,7 @@ We identify our technical contributions as:
 \item An implementation of Gough and Klaeren's range analysis in a
   modern industrial-strength SSA-based compiler.
 \item A different algorithm for inserting and removing $\beta$ nodes
-  that used by Gough and Klaeren that takes advantage of the data
+  than  used by Gough and Klaeren that takes advantage of the data
   structures of a modern SSA compiler.
 \item To facilitate the above, extending IonMonkey with a fast
   (constant time, one integer per basic block memory overhead) 
@@ -206,7 +206,7 @@ Figure \ref{fig:range_arith}.
 \subsection{Conditional Branches and $\beta$ nobes}
 
 An important source of range information that requires care to take
-advantage of is conditional branches. Consider the code in Figure
+advantage of is conditional branches. Consider the code in Listing
 \ref{fig:branch}. All three arithmetic operations in this code can be
 proven to not overflow, but to do this it is not sufficient to simply
 associate each name with a range, since the information differs
@@ -234,7 +234,6 @@ branches with range information.
 \begin{lstlisting}[language=Javascript,
                    caption={Code that requires information about branches to properly analyze},
                    label={fig:branch}, float=ht]
-var y;
 if (x < 0) {
     y = x + 2000000000;
 } else {
@@ -247,7 +246,7 @@ if (x < 0) {
 \end{lstlisting}
 
 \begin{lstlisting}[language=Javascript,
-                   caption={Code from Figure \ref{fig:branch}, in XSA form},
+                   caption={Code from Listing \ref{fig:branch}, in XSA form},
                    label={fig:xsa}, float=ht]
 if (x < 0) {
     x1 = Beta(x, [INT_MIN, -1]);
@@ -309,7 +308,7 @@ of the variable where the branch is guaranteed to have been taken;
 this is accomplished by replacing all uses of original instruction
 that are dominated by the new $\beta$ instruction with the $\beta$. To
 do this, we take advantage of IonMonkey's use chains to efficiently
-iterate over all uses of an instruction.
+iterate over all uses of an instruction and modify them in place.
 
 In order to do this, we needed to be able to efficiently determine
 whether one block is dominated by another. The best way to do that
@@ -422,8 +421,9 @@ def propagateRanges(graph):
 \end{lstlisting}
 
 Recomputation of the possible range of an instruction is fairly simple
-and proceeds by the rules given in Figure \ref{fig:range_anal}. The
-key insight we had in these equations is that while the ranges of the
+and proceeds by the rules given in Figure \ref{fig:range_anal} (many
+operations that we support or omitted from the figure). The key
+insight we had in these equations is that while the ranges of the
 inputs to an operation may be infinite (that is, they may have
 overflowed), this possibility can be ignored when using the ranges as
 inputs. This is because had the computation overflowed, it would have
@@ -474,9 +474,9 @@ assigning a snapshot to the operation, eliminating the overflow check.
 
 \subsection{Array Bounds Check Elimination}
 We do not perform general array bounds check elimination. To do this
-fully would require symbolic range analysis. Since IonMonkey already
-does hoisting of bounds checks out of loops, we determined that the
-effort would probably not be worth the gain.
+would in many cases require symbolic range analysis. Since IonMonkey
+already does hoisting of bounds checks out of loops, we determined
+that the effort would probably not be worth the gain.
 
 We do eliminate bounds checks in one situation: when bounds checks
 have been hoisted out of a loop, a check is added that specifically
