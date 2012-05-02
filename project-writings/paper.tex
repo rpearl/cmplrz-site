@@ -488,7 +488,7 @@ suite developed by Apple, and the Kraken benchmark suite developed by Mozilla.
 
 We ran each benchmark suite on IonMonkey, both with and without our range
 analysis pass, and measured the performance differences. The results are
-summarized below:
+summarized in Figures \ref{fig:v8bench}, \ref{fig:sunspider}, and \ref{fig:kraken}.
 
 \begin{figure}[H]
 \begin{tabular}{|l|l|l|l|l|}
@@ -609,6 +609,36 @@ overhead that our pass requires yields slightly slower performance.
 
 %% XXX TODO MORE HERE
 
+In order to get a different view of how well our optimization was
+performing, we annotated IonMonkey to emit for each addition
+instruction compiled whether or not range analysis proved that it
+could not overflow, and ran this against all of the tests in Kraken,
+Sunspider, and v8bench. The data from these tests are presented in Figure
+\ref{fig:count} (tests that were found to have very few total add
+instructions were not included).
+
+We ran this experiment in two configurations: with and without
+on-stack replacement (OSR) enabled. On-stack replacement is a
+mechanism by which IonMonkey can generate code that allows entering a
+function at a point other than the start; specifically, it allows
+entering in the middle of a loop. OSR allows IonMonkey to switch to
+JITted code in the middle of a loop that is discovered to be hot,
+instead of needing to wait for the function it is in to finish
+first. OSR's impact on how many overlow checks we can eliminate is
+somewhat unpredictable. OSR being on introduces new edges to the
+control flow graph that can result in less precise range
+information. However, OSR also causes more code to be JITted,
+increasing potential opportunities to find ranges. Both of these
+effects come into play in different tests. 
+
+These results show that our range analysis is generally quite
+successful in eliminating overflow checks from programs, but our
+timing results indicate that this does yield that substantial of a
+performance improvement. We believe that this is because the overhead
+of an essentially never taken branch on modern hardware are quite
+low. While on a microbenchmark we constructed overflow check
+elimination resulted in a substantial (!30\%) speedup, it appears that
+this does not translate well to more realistic code.
 
 \begin{figure*}[!ht]
 \centering
