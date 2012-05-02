@@ -655,27 +655,44 @@ Boy, JS is a pain in the ass.
 This is a lesson learned, not a surprise.
 
 \section{Future Work and Conclusions}
-We implement an SSA-based range analysis pass which is capable of inferring
-range information on integer operations. We use the results of this analysis to
-perform some simple optimizations relevant to JavaScript: we eliminate overflow
-checks which can be proven redundant, and also eliminate a limited number of
-array bounds checks.
+We implement an SSA-based range analysis pass which is capable of
+inferring range information on integer operations. We use the results
+of this analysis to perform some simple optimizations relevant to
+JavaScript: we eliminate overflow checks which can be proven
+redundant, and also eliminate a limited number of array bounds checks.
 
-Further optimizations are possible using our range analysis framework. If the
-range associated with an instruction becomes empty, then the block has been
-proven dead and can be eliminated. Control flow operations can be proven
-redundant as well, further eliminating computation and dead basic blocks. These
-graph manipulations are currently not available in the IonMonkey compiler,
+On a suite of standard Javascript benchmarks, our range analysis
+succeeds in eliminating a large fraction of overflow checks for
+integer additions. This translates into a minor overall performance
+win on the Kraken benchmark suite and a very minor overall performance
+loss on the Sunspider suite. Since we should only increase the
+quality of the generated code, any performance losses should be from
+increased compilation overhead (Sunspider tests in particular are
+quite short). The performance improvements are decent, but not
+stellar; we believe this is because Javascript code is generally not
+integer-arithmetic-heavy tight loops and because the overflow test
+branches are generally predicted correctly.
+
+A number of further optimizations are possible using our range
+analysis framework. If the range associated with an instruction
+becomes empty, then the block has been proven dead and can be
+eliminated. Control flow operations can be proven redundant as well,
+further eliminating computation and dead basic blocks. These graph
+manipulations are currently not available in the IonMonkey compiler,
 which is in active development but not yet complete.
 
 Symbolic range propagation, where the bounds are expressed in terms of
-definitions rather than integer constants, is left as future work. Symbolic
-range propagation would allow more sophisticated removal of bounds checks,
-which are generally not based on constants.
+definitions rather than integer constants, is left as future
+work. Symbolic range propagation would allow more sophisticated
+removal of bounds checks, which are generally not based on
+constants. It would also allow for much more potential for eliminating
+redundant branches than just constant ranges would.
 
-In summary, we augment the IonMonkey compiler with range information and begin
-to use this information for the purposes of optimization. We leave more
-sophisticated uses of the analysis as future work.
+We believe that we have implemented a worthwhile optimization and a
+useful analysis pass that will serve as a good building block for
+future IonMonkey optimizations. Our range analysis patches are likely
+to land in IonMonkey in the next month, and it is likely that some of
+the future work we discuss will be taken up by the IonMonkey team.
 
 \bibliography{citations}{}
 \bibliographystyle{abbrv}
