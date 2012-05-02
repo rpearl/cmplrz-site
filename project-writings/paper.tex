@@ -42,21 +42,21 @@ Michael Sullivan\\
 
 \section{Introduction}
 With the explosion of browser based applications that has occurred in
-recent years, Javascript has become one of the most widely used
-programming languages, and Javascript performance has become
-critically important. Unfortunately, Javascript seems to be designed
+recent years, JavaScript has become one of the most widely used
+programming languages, and JavaScript performance has become
+critically important. Unfortunately, JavaScript seems to be designed
 to be un-performant.
 
-One source of these woes are Javascript's dynamic semantics for
+One source of these woes are JavaScript's dynamic semantics for
 numbers: all numeric values are defined by the specification to be
 IEEE 754 double precision floating point values (with bit-wise
 operations being defined to round to the nearest 32 bit integer before
 performing the operation). Since the common case is that numeric
 values are integers and because floating point operations are
-more expensive, all major Javascript implementations attempt to
+more expensive, all major JavaScript implementations attempt to
 represent numbers as integers when possible.
 
-In IonMonkey, Mozilla's next-generation optimizing Javascript JIT
+In IonMonkey, Mozilla's next-generation optimizing JavaScript JIT
 compiler, a hybrid type inference system (which uses both static analysis and
 runtime information\cite{BHackettTI}) is used to generate
 type-specialized code for the common case of integer arithmetic, and
@@ -129,7 +129,7 @@ based range analysis algorithm \cite{Gough94eliminatingrange}.
 \section{IonMonkey Overview}
 The IonMonkey compiler is somewhat loosely based on LLVM, in that it is an
 imperative SSA compiler. IonMonkey takes the bytecode used by the SpiderMonkey
-Javascript interpreter and compiles it to native code. Optimistic type
+JavaScript interpreter and compiles it to native code. Optimistic type
 specialization is used, and if type assumptions fail, then execution ``bails
 out'' to the interpreter.
 
@@ -140,7 +140,7 @@ optimizations are performed, and then the code is lowered to a ``Lower
 Intermediate Representation'' (LIR) used for register allocation and
 code generation.
 
-While the ECMA specification for Javascript requires that all numbers behave as
+While the ECMA specification for JavaScript requires that all numbers behave as
 double-precision floating point values\cite{ECMA-262}, for performance reasons JIT compilers
 represent numbers as 32-bit integers when possible. However, since doubles can
 represent larger values than integers, operations must be guarded against
@@ -268,7 +268,7 @@ dominance frontiers \cite{Cytron}.
 
 This approach does not work for us for two reasons: first, IonMonkey
 does not use Cytron et al.'s algorithm for computing SSA form; it
-instead takes advantage of the structured nature of Javascript code to
+instead takes advantage of the structured nature of JavaScript code to
 go to SSA form without computing dominance frontiers \footnote{More
   precisely, it takes advantage in an ad-hoc and terrifying way of
   poorly documented structured invariants and ``source notes'' in the
@@ -481,7 +481,7 @@ repository of regression tests, and measured the impact of our
 optimization by the commonly available benchmark suites.
 %% TODO : elim stats too
 
-There are three benchmark suites which are generally used to measure Javascript
+There are three benchmark suites which are generally used to measure JavaScript
 JIT compilers: the v8bench suite developed by Google, the SunSpider benchmark
 suite developed by Apple, and the Kraken benchmark suite developed by Mozilla.
 
@@ -617,7 +617,7 @@ This is a lesson learned, not a surprise.
 \section{Future Work and Conclusions}
 We implement an SSA-based range analysis pass which is capable of inferring
 range information on integer operations. We use the results of this analysis to
-perform some simple optimizations relevant to Javascript: we eliminate overflow
+perform some simple optimizations relevant to JavaScript: we eliminate overflow
 checks which can be proven redundant, and also eliminate a limited number of
 array bounds checks.
 
