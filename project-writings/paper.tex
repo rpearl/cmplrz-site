@@ -487,12 +487,15 @@ optimization by the commonly available benchmark suites.
 %% TODO : elim stats too
 
 There are three benchmark suites which are generally used to measure JavaScript
-JIT compilers: the v8bench suite developed by Google, the SunSpider benchmark
-suite developed by Apple, and the Kraken benchmark suite developed by Mozilla.
+JIT compilers: the v8bench suite developed by Google\cite{v8bench}, the SunSpider benchmark
+suite developed by Apple\cite{sunspider}, and the Kraken benchmark suite developed by Mozilla\cite{kraken}
 
 We ran each benchmark suite on IonMonkey, both with and without our range
 analysis pass, and measured the performance differences. The results are
-summarized in Figures \ref{fig:v8bench}, \ref{fig:sunspider}, and \ref{fig:kraken}.
+summarized in Figures \ref{fig:v8bench}, \ref{fig:sunspider}, and
+\ref{fig:kraken}. These figures were gathered using the SunSpider test harness,
+which gives both a mean and a 95\% confidence interval\cite{sunspider}. Each
+test was run 30 times.
 
 \begin{figure}[H]
 \begin{tabular}{|l|l|l|l|l|}
