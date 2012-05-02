@@ -119,8 +119,9 @@ non-iterative, and works by constructing a constraint graph from the program's c
 A variety of other range analyses are available which formulate the problem as
 a more traditional iterative dataflow problem. GCC, for example, uses an SSA
 workflow algorithm due to Patterson in ``Accurate Static Branch Prediction by
-Value Range Propagation.'' The orignal non-SSA based dataflow algorithm is by
-Harrison in ``Compiler Analysis of the Value Ranges of Variables.''
+Value Range Propagation.''\cite{Patterson95accuratestatic}
+The orignal non-SSA based dataflow algorithm is by
+Harrison in ``Compiler Analysis of the Value Ranges of Variables.''\cite{Harrison}
 
 We reviewed the literature on different types of range analysis and
 decided to implement an analysis based on Gough and Klaeren's SSA
