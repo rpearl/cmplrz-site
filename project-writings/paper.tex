@@ -674,13 +674,17 @@ stellar; we believe this is because Javascript code is generally not
 integer-arithmetic-heavy tight loops and because the overflow test
 branches are generally predicted correctly.
 
-A number of further optimizations are possible using our range
-analysis framework. If the range associated with an instruction
-becomes empty, then the block has been proven dead and can be
-eliminated. Control flow operations can be proven redundant as well,
-further eliminating computation and dead basic blocks. These graph
-manipulations are currently not available in the IonMonkey compiler,
-which is in active development but not yet complete.
+A number of Further optimizations are possible using our range analysis
+framework. If the range associated with an instruction becomes empty, then the
+block has been proven dead and can be eliminated. Control flow operations can
+be proven redundant as well, further eliminating computation and dead basic
+blocks. These graph manipulations are currently not available in the IonMonkey
+compiler, which is in active development but not yet complete. There are a
+variety of reasons for this current design restriction. IonMonkey must
+integrate very closely with the interpreter and the JS runtime, and so
+generated code must maintain a careful correspondence with the interpreter.
+This means that eliminating control flow is a non-trivial
+operation\cite{dvander}.
 
 Symbolic range propagation, where the bounds are expressed in terms of
 definitions rather than integer constants, is left as future
