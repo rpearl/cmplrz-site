@@ -31,10 +31,10 @@
 \title{\bf Range Analysis for the IonMonkey JavaScript engine}
 
 \author{
-Ryan Pearl\\
+Ryan Pearl\footnote{Equal contribution to this work}\\
 \texttt{$<$rpearl@andrew.cmu.edu$>$}\\
 \and
-Michael Sullivan\\
+Michael Sullivan\footnotemark[\value{footnote}]\\
 \texttt{$<$mjsulliv@cs.cmu.edu$>$}\\
 }
 
@@ -91,7 +91,7 @@ We identify our technical contributions as:
 \item A different algorithm for inserting and removing $\beta$ nodes
   that used by Gough and Klaeren that takes advantage of the data
   structures of a modern SSA compiler.
-\item To facilitate the above, extended IonMonkey with a fast
+\item To facilitate the above, extending IonMonkey with a fast
   (constant time, one integer per basic block memory overhead) 
   mechanism for determining whether a block is dominated by another.
 \item Extending the analysis to produce the information needed for
@@ -119,8 +119,9 @@ non-iterative, and works by constructing a constraint graph from the program's c
 A variety of other range analyses are available which formulate the problem as
 a more traditional iterative dataflow problem. GCC, for example, uses an SSA
 workflow algorithm due to Patterson in ``Accurate Static Branch Prediction by
-Value Range Propagation.'' The orignal non-SSA based dataflow algorithm is by
-Harrison in ``Compiler Analysis of the Value Ranges of Variables.''
+Value Range Propagation.''\cite{Patterson95accuratestatic}
+The orignal non-SSA based dataflow algorithm is by
+Harrison in ``Compiler Analysis of the Value Ranges of Variables.''\cite{Harrison}
 
 We reviewed the literature on different types of range analysis and
 decided to implement an analysis based on Gough and Klaeren's SSA
@@ -128,10 +129,10 @@ based range analysis algorithm \cite{Gough94eliminatingrange}.
 
 \section{IonMonkey Overview}
 The IonMonkey compiler is somewhat loosely based on LLVM, in that it is an
-imperative SSA compiler. IonMonkey takes the bytecode used by the SpiderMonkey
-JavaScript interpreter and compiles it to native code. Optimistic type
-specialization is used, and if type assumptions fail, then execution ``bails
-out'' to the interpreter.
+imperative SSA-based compiler. IonMonkey takes the bytecode used by the SpiderMonkey
+JavaScript interpreter and compiles it to native code. IonMonkey uses optimistic type
+specialization, and if type assumptions fail, then execution ``bails
+out'' to the interpreter. Bailout points are inserted when global effects take place.
 
 IonMonkey has two intermediate languages. There is a ``Middle
 Intermediate Representation'' (MIR) which encompasses higher-level
