@@ -39,7 +39,7 @@
 
 \begin{document}
 
-\title{\bf Range Analysis for the IonMonkey JavaScript engine}
+\title{\bf Range Analysis for the IonMonkey JavaScript Compiler}
 
 \author{
 Ryan Pearl\footnote{Equal contribution to this work}\\
@@ -203,7 +203,7 @@ standard way, ``clamping'' values outside the range of a 32-bit signed
 integer to $\pm \infty$. Some definitions for this are are shown in
 Figure \ref{fig:range_arith}.
 
-\subsection{Conditional Branches and $\beta$ nobes}
+\subsection{Conditional Branches and $\beta$ Nodes}
 
 An important source of range information that requires care to take
 advantage of is conditional branches. Consider the code in Listing
@@ -300,7 +300,7 @@ in Listing \ref{lst:add_betas}. The algorithm traverses the control
 flow group, looking for blocks that have been entered by a jump
 conditioned on a relational operation. When we find a variable being
 compared to a constant, we compute a range and use it to create a new
-$\beta$ node. As a further optimization, we furthermore insert trivial beta
+$\beta$ node. As an additional optimization, we furthermore insert trivial beta
 nodes when we encounter a
 strict comparison between two variables--the larger must be at least
 $-2^{31}+1$, and the smaller can be at most $2^{31}-2$.
