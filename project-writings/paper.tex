@@ -207,7 +207,7 @@ Figure \ref{fig:range_arith}.
 
 An important source of range information that requires care to take
 advantage of is conditional branches. Consider the code in Listing
-\ref{fig:branch}. All three arithmetic operations in this code can be
+\ref{lst:branch}. All three arithmetic operations in this code can be
 proven to not overflow, but to do this it is not sufficient to simply
 associate each name with a range, since the information differs
 between basic blocks. An obvious approach is to instead associate
@@ -230,10 +230,12 @@ range given by the $\beta$ node. Gough and Klaeren refer to SSA
 extended with $\beta$ nodes as XSA. These $\beta$ nodes are used to split
 definitions at conditionally taken branches, and augment uses inside the
 branches with range information.
+Listing \ref{lst:xsa} shows the code from Listing \ref{lst:branch}
+lifted into XSA form.
 
 \begin{lstlisting}[language=Javascript,
                    caption={Code that requires information about branches to properly analyze},
-                   label={fig:branch}, float=ht]
+                   label={lst:branch}, float=ht]
 if (x < 0) {
     y = x + 2000000000;
 } else {
@@ -246,8 +248,8 @@ if (x < 0) {
 \end{lstlisting}
 
 \begin{lstlisting}[language=Javascript,
-                   caption={Code from Listing \ref{fig:branch}, in XSA form},
-                   label={fig:xsa}, float=ht]
+                   caption={Code from Listing \ref{lst:branch}, in XSA form},
+                   label={lst:xsa}, float=ht]
 if (x < 0) {
     x1 = Beta(x, [INT_MIN, -1]);
     y1 = x1 + 2000000000;
@@ -368,9 +370,6 @@ block.
 
 \subsection{Range Analysis}
 
-At the start of range analysis, all ranges are initialized to
-$[-\infty, \infty]$.
-
 Our algorithm for range analsis is based on the algorithm due to Gough. It
 differs from the paper in a few ways to better fit the architecture of
 IonMonkey. The paper suggests using a dominator tree order, but we found that
@@ -379,7 +378,12 @@ traversal is simpler to implement in IonMonkey, and in general definitions are
 still visited before all their uses. There is no issue of correctness since we
 iterate until no range information is changing.
 
-We compute the range of each definition unconditionally once, and add all phi
+Pseudocode for range analysis is shown in Listing \ref{lst:propagate_ranges}.
+
+At the start of range analysis, all ranges are initialized to
+$[-\infty, \infty]$.
+We then
+compute the range of each definition unconditionally once, and add all phi
 nodes and beta nodes to a worklist--the only values which can change are those
 that flow through backedges captured by phis. We then iterate through the
 worklist, recomputing the range of each definition, and add all consumers of
