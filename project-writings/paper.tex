@@ -375,8 +375,8 @@ differs from the paper in a few ways to better fit the architecture of
 IonMonkey. The paper suggests using a dominator tree order, but we found that
 using reverse post-order was better for our purposes: reverse post-order
 traversal is simpler to implement in IonMonkey, and in general definitions are
-still visited before all their uses. There is no issue of correctness since we
-iterate until no range information is changing.
+still visited before all their uses. There is no issue of correctness since at
+all points in the algorithm, the range information holds.
 
 Pseudocode for range analysis is shown in Listing \ref{lst:propagate_ranges}.
 
