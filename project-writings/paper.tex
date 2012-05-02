@@ -10,6 +10,8 @@
 \usepackage{hyperref}
 \usepackage{courier}
 \usepackage{listings}
+\usepackage{color}
+\definecolor{lightgray}{rgb}{.9,.9,.9}
 %\usepackage[all]{hypcap}
 
 \newcommand{\Squash}{\mathsf{Squash}}
@@ -19,11 +21,20 @@
 \let\x\cdot
 \lstset{
   language=Python,
+  backgroundcolor=\color{lightgray},
   showstringspaces=false,
   tabsize=4,
   basicstyle=\ttfamily,
   keywordstyle=\bfseries\ttfamily,
   captionpos=b
+}
+\lstdefinelanguage{JavaScript}{
+  keywords={if,else,var},
+  keywordstyle=\bfseries\ttfamily,
+  backgroundcolor=\color{lightgray},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/}
 }
 
 \begin{document}
@@ -136,10 +147,11 @@ out'' to the interpreter. Bailout points are inserted when global effects take p
 
 IonMonkey has two intermediate languages. There is a ``Middle
 Intermediate Representation'' (MIR) which encompasses higher-level
-constructs such as lambdas, objects, and strings. A variety of
-optimizations are performed, and then the code is lowered to a ``Lower
-Intermediate Representation'' (LIR) used for register allocation and
-code generation.
+constructs such as lambdas, objects, and strings. IonMonkey performs a variety of
+optimizations including global value numbering and loop invariant code motion,
+and then the code is lowered to a ``Lower Intermediate Representation'' (LIR)
+used for register allocation and code generation. IonMonkey currently supports
+code generation for the x86, x86\_64, and ARM architectures.
 
 While the ECMA specification for JavaScript requires that all numbers behave as
 double-precision floating point values\cite{ECMA-262}, for performance reasons JIT compilers
@@ -219,9 +231,9 @@ extended with $\beta$ nodes as XSA. These $\beta$ nodes are used to split
 definitions at conditionally taken branches, and augment uses inside the
 branches with range information.
 
-\begin{figure}[ht]
-\begin{center}
-\begin{verbatim}
+\begin{lstlisting}[language=Javascript,
+                   caption={Code that requires information about branches to properly analyze},
+                   label={fig:branch}, float=ht]
 var y;
 if (x < 0) {
     y = x + 2000000000;
@@ -232,15 +244,11 @@ if (x < 0) {
         y = x - 3000000000;
     }
 }
-\end{verbatim}
-\end{center}
-\caption{Code that requires information about branches to properly analyze}
-\label{fig:branch}
-\end{figure}
+\end{lstlisting}
 
-\begin{figure}[ht]
-\begin{center}
-\begin{verbatim}
+\begin{lstlisting}[language=Javascript,
+                   caption={Code from Figure \ref{fig:branch}, in XSA form},
+                   label={fig:xsa}, float=ht]
 if (x < 0) {
     x1 = Beta(x, [INT_MIN, -1]);
     y1 = x1 + 2000000000;
@@ -256,11 +264,7 @@ if (x < 0) {
     y4 = Phi(y2, y3);
 }
 y = Phi(y1, y4);
-\end{verbatim}
-\end{center}
-\caption{Code from Figure \ref{fig:branch}, in XSA form}
-\label{fig:xsa}
-\end{figure}
+\end{lstlisting}
 
 \subsection{Inserting and Removing Beta Nodes}
 To put programs in XSA form, Gough and Klaeren presented an extension
@@ -316,7 +320,7 @@ ancestor's dominated blocks.
 
 \begin{lstlisting}[language=Python,
                    caption={Pseudocode algorithm for inserting beta nodes},
-                   label={lst:add_betas}]
+                   label={lst:add_betas}, float=ht]
 def addBetaNodesToFunc(cfg):
   for b in cfg.basic_blocks():
     if b.numPredecessors() == 1 and isBranch(b.pred(0).lastInstruction()):
@@ -395,7 +399,7 @@ when performing more aggressive optimization.
 
 \begin{lstlisting}[language=Python,
                    caption={Pseudocode algorithm for propagating range information},
-                   label={lst:propagate_ranges}]
+                   label={lst:propagate_ranges}, float=ht]
 def propagateRanges(graph):
     worklist = []
     for block in reversePostOrder(graph):
