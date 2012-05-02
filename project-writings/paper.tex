@@ -620,7 +620,7 @@ string:              & 1.009x as slow &  81.3ms $\pm$ 0.2\% &   82.1ms $\pm$ 0.2
 
 To summarize our evaluation, we discovered the checks we eliminate do result in
 some measurable performance increase. In extremly short-running tests such
-Sunspider (see Figure \ref{fig:sunspider}), the additional compile-time
+SunSpider (see Figure \ref{fig:sunspider}), the additional compile-time
 overhead that our pass requires yields slightly slower performance.
 
 %% XXX TODO MORE HERE
@@ -629,7 +629,7 @@ In order to get a different view of how well our optimization was
 performing, we annotated IonMonkey to emit for each addition and subtraction
 instruction compiled whether or not range analysis proved that it
 could not overflow, and ran this against all of the tests in Kraken,
-Sunspider, and v8bench. The data from these tests are presented in Figure
+SunSpider, and v8bench. The data from these tests are presented in Figure
 \ref{fig:count} (tests that were found to have very few total add
 instructions were not included).
 
@@ -651,7 +651,7 @@ These results show that our range analysis is generally quite
 successful in eliminating overflow checks from programs, but our
 timing results indicate that this does not yield that substantial of a
 performance improvement. We believe that this is because the overhead
-of an essentially never taken branch on modern hardware are quite
+of an essentially never taken branch on modern hardware is quite
 low. While on a microbenchmark we constructed overflow check
 elimination resulted in a substantial (around 30\%) speedup, it appears that
 this does not translate well to more realistic code.
@@ -675,15 +675,15 @@ On a suite of standard Javascript benchmarks, our range analysis
 succeeds in eliminating a large fraction of overflow checks for
 integer additions and subtractions. This translates into a minor
 overall performance win on the Kraken benchmark suite and a very minor
-overall performance loss on the Sunspider suite. Since we should only
+overall performance loss on the SunSpider suite. Since we should only
 increase the quality of the generated code, any performance losses
-should be from increased compilation overhead (Sunspider tests in
+should be from increased compilation overhead (SunSpider tests in
 particular are quite short). The performance improvements are decent,
 but not stellar; we believe this is because Javascript code is
 generally not integer-arithmetic-heavy tight loops and because the
 overflow test branches are generally predicted correctly.
 
-A number of Further optimizations are possible using our range analysis
+A number of further optimizations are possible using our range analysis
 framework. If the range associated with an instruction becomes empty, then the
 block has been proven dead and can be eliminated. Control flow operations can
 be proven redundant as well, further eliminating computation and dead basic
