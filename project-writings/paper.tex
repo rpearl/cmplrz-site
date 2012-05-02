@@ -299,7 +299,12 @@ in Listing \ref{lst:add_betas}. The algorithm traverses the control
 flow group, looking for blocks that have been entered by a jump
 conditioned on a relational operation. When we find a variable being
 compared to a constant, we compute a range and use it to create a new
-$\beta$ node. We want to propagate this range information to all uses
+$\beta$ node. As a further optimization, we furthermore insert trivial beta
+nodes when we encounter a
+strict comparison between two variables--the larger must be at least
+$-2^{31}+1$, and the smaller can be at most $2^{31}-2$.
+
+After inserting a $\beta$ node, we then want to propagate this range information to all uses
 of the variable where the branch is guaranteed to have been taken;
 this is accomplished by replacing all uses of original instruction
 that are dominated by the new $\beta$ instruction with the $\beta$. To
@@ -487,12 +492,15 @@ optimization by the commonly available benchmark suites.
 %% TODO : elim stats too
 
 There are three benchmark suites which are generally used to measure JavaScript
-JIT compilers: the v8bench suite developed by Google, the SunSpider benchmark
-suite developed by Apple, and the Kraken benchmark suite developed by Mozilla.
+JIT compilers: the v8bench suite developed by Google\cite{v8bench}, the SunSpider benchmark
+suite developed by Apple\cite{sunspider}, and the Kraken benchmark suite developed by Mozilla\cite{kraken}
 
 We ran each benchmark suite on IonMonkey, both with and without our range
 analysis pass, and measured the performance differences. The results are
-summarized in Figures \ref{fig:v8bench}, \ref{fig:sunspider}, and \ref{fig:kraken}.
+summarized in Figures \ref{fig:v8bench}, \ref{fig:sunspider}, and
+\ref{fig:kraken}. These figures were gathered using the SunSpider test harness,
+which gives both a mean and a 95\% confidence interval\cite{sunspider}. Each
+test was run 30 times.
 
 \begin{figure}[H]
 \begin{tabular}{|l|l|l|l|l|}
@@ -522,48 +530,48 @@ summarized in Figures \ref{fig:v8bench}, \ref{fig:sunspider}, and \ref{fig:krake
 Total:                 & 1.001x as slow & 279.2ms $\pm$ 0.1\% &  279.6ms $\pm$ 0.1\%   &  significant \\
 \hline\hline
 3d:                  & 1.004x as slow &  52.5ms $\pm$ 0.3\% &   52.7ms $\pm$ 0.3\%   &  significant \\
-\hline\hspace{1em} cube:              & ??               &  25.1ms $\pm$ 0.3\% &   25.2ms $\pm$ 0.4\%   &  \textit{might} be 1.001x as slow \\
-\hline\hspace{1em} morph:             & ??               &   6.9ms $\pm$ 0.5\% &    6.9ms $\pm$ 0.4\%   &  \textit{might} be 1.003x as slow \\
-\hline\hspace{1em} raytrace:          & 1.009x as slow &  20.4ms $\pm$ 0.5\% &   20.6ms $\pm$ 0.4\%   &  significant \\
+\hline\hspace{0.5em} cube:              & ??               &  25.1ms $\pm$ 0.3\% &   25.2ms $\pm$ 0.4\%   &  \textit{might} be 1.001x as slow \\
+\hline\hspace{0.5em} morph:             & ??               &   6.9ms $\pm$ 0.5\% &    6.9ms $\pm$ 0.4\%   &  \textit{might} be 1.003x as slow \\
+\hline\hspace{0.5em} raytrace:          & 1.009x as slow &  20.4ms $\pm$ 0.5\% &   20.6ms $\pm$ 0.4\%   &  significant \\
 \hline\hline
 access:              & 1.011x as fast   &  18.5ms $\pm$ 0.3\% &   18.3ms $\pm$ 0.3\%   &  significant \\
-\hline\hspace{1em} binary-trees:      & 1.019x as slow &   3.0ms $\pm$ 0.9\% &    3.0ms $\pm$ 0.9\%   &  significant \\
-\hline\hspace{1em} fannkuch:          & 1.034x as fast   &   8.8ms $\pm$ 0.3\% &    8.5ms $\pm$ 0.4\%   &  significant \\
-\hline\hspace{1em} nbody:             & 1.035x as fast   &   3.6ms $\pm$ 0.6\% &    3.5ms $\pm$ 0.3\%   &  significant \\
-\hline\hspace{1em} nsieve:            & 1.052x as slow &   3.1ms $\pm$ 0.6\% &    3.3ms $\pm$ 0.5\%   &  significant \\
+\hline\hspace{0.5em} binary-trees:      & 1.019x as slow &   3.0ms $\pm$ 0.9\% &    3.0ms $\pm$ 0.9\%   &  significant \\
+\hline\hspace{0.5em} fannkuch:          & 1.034x as fast   &   8.8ms $\pm$ 0.3\% &    8.5ms $\pm$ 0.4\%   &  significant \\
+\hline\hspace{0.5em} nbody:             & 1.035x as fast   &   3.6ms $\pm$ 0.6\% &    3.5ms $\pm$ 0.3\%   &  significant \\
+\hline\hspace{0.5em} nsieve:            & 1.052x as slow &   3.1ms $\pm$ 0.6\% &    3.3ms $\pm$ 0.5\%   &  significant \\
 \hline\hline
 bitops:              & 1.008x as fast   &  11.4ms $\pm$ 0.4\% &   11.3ms $\pm$ 0.4\%   &  significant \\
-\hline\hspace{1em} 3bit-bits-in-byte: & 1.009x as fast   &   1.0ms $\pm$ 0.6\% &    1.0ms $\pm$ 0.6\%   &  significant \\
-\hline\hspace{1em} bits-in-byte:      & 1.023x as fast   &   4.1ms $\pm$ 0.5\% &    4.0ms $\pm$ 0.6\%   &  significant \\
-\hline\hspace{1em} bitwise-and:       & ??               &   2.8ms $\pm$ 0.5\% &    2.8ms $\pm$ 0.6\%   &  \textit{might} be 1.005x as slow \\
-\hline\hspace{1em} nsieve-bits:       & -                &   3.6ms $\pm$ 0.5\% &    3.6ms $\pm$ 0.5\% & \\
+\hline\hspace{0.5em} 3bit-bits-in-byte: & 1.009x as fast   &   1.0ms $\pm$ 0.6\% &    1.0ms $\pm$ 0.6\%   &  significant \\
+\hline\hspace{0.5em} bits-in-byte:      & 1.023x as fast   &   4.1ms $\pm$ 0.5\% &    4.0ms $\pm$ 0.6\%   &  significant \\
+\hline\hspace{0.5em} bitwise-and:       & ??               &   2.8ms $\pm$ 0.5\% &    2.8ms $\pm$ 0.6\%   &  \textit{might} be 1.005x as slow \\
+\hline\hspace{0.5em} nsieve-bits:       & -                &   3.6ms $\pm$ 0.5\% &    3.6ms $\pm$ 0.5\% & \\
 \hline\hline
 controlflow:         & 1.020x as slow &   2.3ms $\pm$ 0.7\% &    2.3ms $\pm$ 0.4\%   &  significant \\
-\hline\hspace{1em} recursive:         & 1.020x as slow &   2.3ms $\pm$ 0.7\% &    2.3ms $\pm$ 0.4\%   &  significant \\
+\hline\hspace{0.5em} recursive:         & 1.020x as slow &   2.3ms $\pm$ 0.7\% &    2.3ms $\pm$ 0.4\%   &  significant \\
 \hline\hline
 crypto:              & 1.008x as slow &  27.3ms $\pm$ 0.3\% &   27.5ms $\pm$ 0.3\%   &  significant \\
-\hline\hspace{1em} aes:               & 1.009x as slow &  15.5ms $\pm$ 0.4\% &   15.6ms $\pm$ 0.4\%   &  significant \\
-\hline\hspace{1em} md5:               & ??               &   6.9ms $\pm$ 0.7\% &    6.9ms $\pm$ 0.4\%   &  \textit{might} be 1.006x as slow \\
-\hline\hspace{1em} sha1:              & 1.008x as slow &   4.9ms $\pm$ 0.5\% &    4.9ms $\pm$ 0.5\%   &  significant \\
+\hline\hspace{0.5em} aes:               & 1.009x as slow &  15.5ms $\pm$ 0.4\% &   15.6ms $\pm$ 0.4\%   &  significant \\
+\hline\hspace{0.5em} md5:               & ??               &   6.9ms $\pm$ 0.7\% &    6.9ms $\pm$ 0.4\%   &  \textit{might} be 1.006x as slow \\
+\hline\hspace{0.5em} sha1:              & 1.008x as slow &   4.9ms $\pm$ 0.5\% &    4.9ms $\pm$ 0.5\%   &  significant \\
 \hline\hline
 date:                & 1.008x as fast   &  62.6ms $\pm$ 0.2\% &   62.1ms $\pm$ 0.2\%   &  significant \\
-\hline\hspace{1em} format-tofte:      & -                &  42.6ms $\pm$ 0.2\% &   42.6ms $\pm$ 0.2\%   & \\
-\hline\hspace{1em} format-xparb:      & 1.023x as fast   &  20.0ms $\pm$ 0.3\% &   19.5ms $\pm$ 0.3\%   &  significant \\
+\hline\hspace{0.5em} format-tofte:      & -                &  42.6ms $\pm$ 0.2\% &   42.6ms $\pm$ 0.2\%   & \\
+\hline\hspace{0.5em} format-xparb:      & 1.023x as fast   &  20.0ms $\pm$ 0.3\% &   19.5ms $\pm$ 0.3\%   &  significant \\
 \hline\hline
 math:                & ??               &  13.2ms $\pm$ 0.3\% &   13.2ms $\pm$ 0.4\%   &  \textit{might} be 1.003x as slow \\
-\hline\hspace{1em} cordic:            & 1.021x as fast   &   2.7ms $\pm$ 0.4\% &    2.6ms $\pm$ 0.6\%   &  significant \\
-\hline\hspace{1em} partial-sums:      & -                &   7.1ms $\pm$ 0.5\% &    7.1ms $\pm$ 0.6\% & \\
-\hline\hspace{1em} spectral-norm:     & 1.024x as slow &   3.4ms $\pm$ 0.6\% &    3.5ms $\pm$ 0.4\%   &  significant \\
+\hline\hspace{0.5em} cordic:            & 1.021x as fast   &   2.7ms $\pm$ 0.4\% &    2.6ms $\pm$ 0.6\%   &  significant \\
+\hline\hspace{0.5em} partial-sums:      & -                &   7.1ms $\pm$ 0.5\% &    7.1ms $\pm$ 0.6\% & \\
+\hline\hspace{0.5em} spectral-norm:     & 1.024x as slow &   3.4ms $\pm$ 0.6\% &    3.5ms $\pm$ 0.4\%   &  significant \\
 \hline\hline
 regexp:              & 1.012x as fast   &  10.2ms $\pm$ 0.5\% &   10.0ms $\pm$ 0.4\%   &  significant \\
-\hline\hspace{1em} dna:               & 1.012x as fast   &  10.2ms $\pm$ 0.5\% &   10.0ms $\pm$ 0.4\%   &  significant \\
+\hline\hspace{0.5em} dna:               & 1.012x as fast   &  10.2ms $\pm$ 0.5\% &   10.0ms $\pm$ 0.4\%   &  significant \\
 \hline\hline
 string:              & 1.009x as slow &  81.3ms $\pm$ 0.2\% &   82.1ms $\pm$ 0.2\%   &  significant \\
-\hline\hspace{1em} base64:            & ??               &   4.9ms $\pm$ 0.6\% &    4.9ms $\pm$ 0.4\%   &  \textit{might} be 1.006x as slow \\
-\hline\hspace{1em} fasta:             & 1.012x as slow &   6.9ms $\pm$ 0.5\% &    6.9ms $\pm$ 0.4\%   &  significant \\
-\hline\hspace{1em} tagcloud:          & -                &  23.2ms $\pm$ 0.4\% &   23.3ms $\pm$ 0.3\% & \\
-\hline\hspace{1em} unpack-code:       & 1.014x as slow &  39.5ms $\pm$ 0.2\% &   40.1ms $\pm$ 0.3\%   &  significant \\
-\hline\hspace{1em} validate-input:    & 1.007x as slow &   6.8ms $\pm$ 0.4\% &    6.9ms $\pm$ 0.5\%   &  significant  \\
+\hline\hspace{0.5em} base64:            & ??               &   4.9ms $\pm$ 0.6\% &    4.9ms $\pm$ 0.4\%   &  \textit{might} be 1.006x as slow \\
+\hline\hspace{0.5em} fasta:             & 1.012x as slow &   6.9ms $\pm$ 0.5\% &    6.9ms $\pm$ 0.4\%   &  significant \\
+\hline\hspace{0.5em} tagcloud:          & -                &  23.2ms $\pm$ 0.4\% &   23.3ms $\pm$ 0.3\% & \\
+\hline\hspace{0.5em} unpack-code:       & 1.014x as slow &  39.5ms $\pm$ 0.2\% &   40.1ms $\pm$ 0.3\%   &  significant \\
+\hline\hspace{0.5em} validate-input:    & 1.007x as slow &   6.8ms $\pm$ 0.4\% &    6.9ms $\pm$ 0.5\%   &  significant  \\
 \hline
 \end{tabular}
 \caption{SunSpider benchmark results}
@@ -578,28 +586,28 @@ string:              & 1.009x as slow &  81.3ms $\pm$ 0.2\% &   82.1ms $\pm$ 0.2
     Total:                      & 1.015x as fast   & 2319.6ms $\pm$ 0.3\% &  2285.4ms $\pm$ 0.4\%  &   significant\\
 \hline\hline
       ai:                       & 1.118x as fast   &  121.3ms $\pm$ 0.8\% &   108.5ms $\pm$ 1.2\%  &   significant\\
-\hline\hspace{1em} astar:                  & 1.118x as fast   &  121.3ms $\pm$ 0.8\% &   108.5ms $\pm$ 1.2\%  &   significant\\
+\hline\hspace{0.5em} astar:                  & 1.118x as fast   &  121.3ms $\pm$ 0.8\% &   108.5ms $\pm$ 1.2\%  &   significant\\
 \hline\hline
       audio:                    & -                &  842.8ms $\pm$ 0.4\% &   838.0ms $\pm$ 0.7\%  &\\
-\hline\hspace{1em} beat-detection:         & ??               &  393.0ms $\pm$ 1.0\% &   397.6ms $\pm$ 1.5\%  &   \textit{might} be 1.012x as slow\\
-\hline\hspace{1em} dft:                    & 1.030x as fast   &  162.6ms $\pm$ 0.6\% &   157.8ms $\pm$ 0.5\%  &   significant\\
-\hline\hspace{1em} fft:                    & 1.016x as fast   &  123.5ms $\pm$ 0.2\% &   121.6ms $\pm$ 0.4\%  &   significant\\
-\hline\hspace{1em} oscillator:             & 1.017x as fast   &  163.7ms $\pm$ 0.3\% &   160.9ms $\pm$ 0.3\%  &   significant\\
+\hline\hspace{0.5em} beat-detection:         & ??               &  393.0ms $\pm$ 1.0\% &   397.6ms $\pm$ 1.5\%  &   \textit{might} be 1.012x as slow\\
+\hline\hspace{0.5em} dft:                    & 1.030x as fast   &  162.6ms $\pm$ 0.6\% &   157.8ms $\pm$ 0.5\%  &   significant\\
+\hline\hspace{0.5em} fft:                    & 1.016x as fast   &  123.5ms $\pm$ 0.2\% &   121.6ms $\pm$ 0.4\%  &   significant\\
+\hline\hspace{0.5em} oscillator:             & 1.017x as fast   &  163.7ms $\pm$ 0.3\% &   160.9ms $\pm$ 0.3\%  &   significant\\
 \hline\hline
       imaging:                  & 1.020x as fast   &  569.1ms $\pm$ 0.9\% &   557.9ms $\pm$ 1.3\%  &   significant\\
-\hline\hspace{1em} gaussian-blur:          & -                &  197.2ms $\pm$ 1.7\% &   193.7ms $\pm$ 2.1\%  &\\
-\hline\hspace{1em} darkroom:               & -                &  248.2ms $\pm$ 0.3\% &   247.6ms $\pm$ 0.4\%  &\\
-\hline\hspace{1em} desaturate:             & 1.062x as fast   &  123.8ms $\pm$ 3.2\% &   116.7ms $\pm$ 5.1\%  &   significant\\
+\hline\hspace{0.5em} gaussian-blur:          & -                &  197.2ms $\pm$ 1.7\% &   193.7ms $\pm$ 2.1\%  &\\
+\hline\hspace{0.5em} darkroom:               & -                &  248.2ms $\pm$ 0.3\% &   247.6ms $\pm$ 0.4\%  &\\
+\hline\hspace{0.5em} desaturate:             & 1.062x as fast   &  123.8ms $\pm$ 3.2\% &   116.7ms $\pm$ 5.1\%  &   significant\\
 \hline\hline
       json:                     & 1.019x as fast   &  121.3ms $\pm$ 0.2\% &   119.0ms $\pm$ 0.4\%  &   significant\\
-\hline\hspace{1em} parse-financial:        & 1.005x as fast   &   75.8ms $\pm$ 0.2\% &    75.5ms $\pm$ 0.4\%  &   significant\\
-\hline\hspace{1em} stringify-tinderbox:    & 1.044x as fast   &   45.5ms $\pm$ 0.5\% &    43.5ms $\pm$ 0.8\%  &   significant\\
+\hline\hspace{0.5em} parse-financial:        & 1.005x as fast   &   75.8ms $\pm$ 0.2\% &    75.5ms $\pm$ 0.4\%  &   significant\\
+\hline\hspace{0.5em} stringify-tinderbox:    & 1.044x as fast   &   45.5ms $\pm$ 0.5\% &    43.5ms $\pm$ 0.8\%  &   significant\\
 \hline\hline
       stanford:                 & -                &  665.0ms $\pm$ 0.5\% &   662.2ms $\pm$ 0.4\%  &\\
-\hline\hspace{1em} crypto-aes:             & -                &  160.7ms $\pm$ 1.5\% &   160.6ms $\pm$ 1.1\%  &\\
-\hline\hspace{1em} crypto-ccm:             & 1.008x as slow &  158.6ms $\pm$ 0.4\% &   159.8ms $\pm$ 0.5\%  &   significant\\
-\hline\hspace{1em} crypto-pbkdf2:          & 1.006x as fast   &  254.9ms $\pm$ 0.5\% &   253.3ms $\pm$ 0.4\%  &   significant\\
-\hline\hspace{1em} crypto-sha256-iterative:& 1.025x as fast   &   90.8ms $\pm$ 0.4\% &    88.5ms $\pm$ 0.5\%  &   significant \\
+\hline\hspace{0.5em} crypto-aes:             & -                &  160.7ms $\pm$ 1.5\% &   160.6ms $\pm$ 1.1\%  &\\
+\hline\hspace{0.5em} crypto-ccm:             & 1.008x as slow &  158.6ms $\pm$ 0.4\% &   159.8ms $\pm$ 0.5\%  &   significant\\
+\hline\hspace{0.5em} crypto-pbkdf2:          & 1.006x as fast   &  254.9ms $\pm$ 0.5\% &   253.3ms $\pm$ 0.4\%  &   significant\\
+\hline\hspace{0.5em} crypto-sha256-iterative:& 1.025x as fast   &   90.8ms $\pm$ 0.4\% &    88.5ms $\pm$ 0.5\%  &   significant \\
 \hline
 \end{tabular}
 \caption{Kraken benchmark results}
@@ -652,12 +660,6 @@ this does not translate well to more realistic code.
 \end{figure*}
 
 
-\section{Surprises and Lessons Learned}
-%% XXX: TODO
-%% Were any of your results surprising our counter-intuitive? If so, what did you learn from those surprises? What did you learn from this experience in general?
-Boy, JS is a pain in the ass.
-This is a lesson learned, not a surprise.
-
 \section{Future Work and Conclusions}
 We implement an SSA-based range analysis pass which is capable of
 inferring range information on integer operations. We use the results
@@ -677,13 +679,17 @@ but not stellar; we believe this is because Javascript code is
 generally not integer-arithmetic-heavy tight loops and because the
 overflow test branches are generally predicted correctly.
 
-A number of further optimizations are possible using our range
-analysis framework. If the range associated with an instruction
-becomes empty, then the block has been proven dead and can be
-eliminated. Control flow operations can be proven redundant as well,
-further eliminating computation and dead basic blocks. These graph
-manipulations are currently not available in the IonMonkey compiler,
-which is in active development but not yet complete.
+A number of Further optimizations are possible using our range analysis
+framework. If the range associated with an instruction becomes empty, then the
+block has been proven dead and can be eliminated. Control flow operations can
+be proven redundant as well, further eliminating computation and dead basic
+blocks. These graph manipulations are currently not available in the IonMonkey
+compiler, which is in active development but not yet complete. There are a
+variety of reasons for this current design restriction. IonMonkey must
+integrate very closely with the interpreter and the JS runtime, and so
+generated code must maintain a careful correspondence with the interpreter.
+This means that eliminating control flow is a non-trivial
+operation\cite{dvander}.
 
 Symbolic range propagation, where the bounds are expressed in terms of
 definitions rather than integer constants, is left as future
