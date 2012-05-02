@@ -141,7 +141,7 @@ Intermediate Representation'' (LIR) used for register allocation and
 code generation.
 
 While the ECMA specification for Javascript requires that all numbers behave as
-double-precision floating point values, for performance reasons JIT compilers
+double-precision floating point values\cite{ECMA-262}, for performance reasons JIT compilers
 represent numbers as 32-bit integers when possible. However, since doubles can
 represent larger values than integers, operations must be guarded against
 overflow.  Our range analysis pass eliminates overflow checks when operations
