@@ -299,7 +299,12 @@ in Listing \ref{lst:add_betas}. The algorithm traverses the control
 flow group, looking for blocks that have been entered by a jump
 conditioned on a relational operation. When we find a variable being
 compared to a constant, we compute a range and use it to create a new
-$\beta$ node. We want to propagate this range information to all uses
+$\beta$ node. As a further optimization, we furthermore insert trivial beta
+nodes when we encounter a
+strict comparison between two variables--the larger must be at least
+$-2^{31}+1$, and the smaller can be at most $2^{31}-2$.
+
+After inserting a $\beta$ node, we then want to propagate this range information to all uses
 of the variable where the branch is guaranteed to have been taken;
 this is accomplished by replacing all uses of original instruction
 that are dominated by the new $\beta$ instruction with the $\beta$. To
