@@ -2,7 +2,7 @@
 
 all: paper.pdf
 
-paper.pdf: paper.tex citations.bib
+paper.pdf: paper.tex citations.bib counts_graph.png
 	pdflatex $< && bibtex paper && pdflatex $< && pdflatex $< 
 
 %.pdf: %.ps
