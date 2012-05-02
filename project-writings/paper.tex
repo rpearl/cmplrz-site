@@ -614,7 +614,7 @@ overhead that our pass requires yields slightly slower performance.
 %% XXX TODO MORE HERE
 
 In order to get a different view of how well our optimization was
-performing, we annotated IonMonkey to emit for each addition
+performing, we annotated IonMonkey to emit for each addition and subtraction
 instruction compiled whether or not range analysis proved that it
 could not overflow, and ran this against all of the tests in Kraken,
 Sunspider, and v8bench. The data from these tests are presented in Figure
@@ -647,7 +647,7 @@ this does not translate well to more realistic code.
 \begin{figure*}[!ht]
 \centering
 \includegraphics[width=0.98\textwidth]{counts_graph.png}
-\caption{Percentage of add overflow checks eliminated}
+\caption{Fraction of add/subtract overflow checks eliminated}
 \label{fig:count}
 \end{figure*}
 
@@ -667,15 +667,15 @@ redundant, and also eliminate a limited number of array bounds checks.
 
 On a suite of standard Javascript benchmarks, our range analysis
 succeeds in eliminating a large fraction of overflow checks for
-integer additions. This translates into a minor overall performance
-win on the Kraken benchmark suite and a very minor overall performance
-loss on the Sunspider suite. Since we should only increase the
-quality of the generated code, any performance losses should be from
-increased compilation overhead (Sunspider tests in particular are
-quite short). The performance improvements are decent, but not
-stellar; we believe this is because Javascript code is generally not
-integer-arithmetic-heavy tight loops and because the overflow test
-branches are generally predicted correctly.
+integer additions and subtractions. This translates into a minor
+overall performance win on the Kraken benchmark suite and a very minor
+overall performance loss on the Sunspider suite. Since we should only
+increase the quality of the generated code, any performance losses
+should be from increased compilation overhead (Sunspider tests in
+particular are quite short). The performance improvements are decent,
+but not stellar; we believe this is because Javascript code is
+generally not integer-arithmetic-heavy tight loops and because the
+overflow test branches are generally predicted correctly.
 
 A number of further optimizations are possible using our range
 analysis framework. If the range associated with an instruction
