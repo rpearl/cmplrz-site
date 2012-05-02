@@ -91,7 +91,7 @@ We identify our technical contributions as:
 \item A different algorithm for inserting and removing $\beta$ nodes
   that used by Gough and Klaeren that takes advantage of the data
   structures of a modern SSA compiler.
-\item To facilitate the above, extended IonMonkey with a fast
+\item To facilitate the above, extending IonMonkey with a fast
   (constant time, one integer per basic block memory overhead) 
   mechanism for determining whether a block is dominated by another.
 \item Extending the analysis to produce the information needed for
@@ -129,10 +129,10 @@ based range analysis algorithm \cite{Gough94eliminatingrange}.
 
 \section{IonMonkey Overview}
 The IonMonkey compiler is somewhat loosely based on LLVM, in that it is an
-imperative SSA compiler. IonMonkey takes the bytecode used by the SpiderMonkey
-JavaScript interpreter and compiles it to native code. Optimistic type
-specialization is used, and if type assumptions fail, then execution ``bails
-out'' to the interpreter.
+imperative SSA-based compiler. IonMonkey takes the bytecode used by the SpiderMonkey
+JavaScript interpreter and compiles it to native code. IonMonkey uses optimistic type
+specialization, and if type assumptions fail, then execution ``bails
+out'' to the interpreter. Bailout points are inserted when global effects take place.
 
 IonMonkey has two intermediate languages. There is a ``Middle
 Intermediate Representation'' (MIR) which encompasses higher-level
