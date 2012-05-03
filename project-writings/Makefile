@@ -1,9 +1,14 @@
 .PHONY: all clean reallyclean
 
-all: paper.pdf
+all: paper.pdf poster.pdf
 
 paper.pdf: paper.tex citations.bib counts_graph.png
 	pdflatex $< && bibtex paper && pdflatex $< && pdflatex $< 
+
+poster.pdf: poster.tex
+	pdflatex $< && pdflatex $< 
+
+
 
 %.pdf: %.ps
 	ps2pdf $<

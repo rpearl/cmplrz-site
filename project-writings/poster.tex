@@ -1,0 +1,61 @@
+\pagenumbering{gobble}
+\documentclass{slides}
+\usepackage{times}
+
+
+
+\usepackage{amsmath,amsthm,amssymb,color}
+%\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{hyperref}
+%\usepackage{courier}
+\usepackage{listings}
+\usepackage{color}
+%\usepackage[all]{hypcap}
+
+\newcommand{\Squash}{\mathsf{Squash}}
+\newcommand{\Clamp}{\mathsf{Clamp}}
+\newcommand{\Range}{\mathsf{Range}}
+
+\let\x\cdot
+
+
+\begin{document}
+
+\title{\bf Range Analysis for the IonMonkey JavaScript Compiler}
+\author{Ryan Pearl and Michael Sullivan}
+
+\maketitle
+
+\begin{slide}
+\begin{center}
+{\Huge \bf{IonMonkey}}
+\end{center}
+
+\begin{itemize}
+\item IonMonkey is Mozilla's next generation Javascript engine
+\item Optimizing JIT compiler
+\item Modern SSA-based compiler with internals inspired by LLVM
+\item Performs optimistic type specialization and bails out when type
+  assumptions fail
+\item Designed to be easy to extend
+\end{itemize}
+\end{slide}
+
+\begin{slide}
+\begin{center}
+{\Huge \bf{JavaScript arithmetic}}
+\end{center}
+\begin{itemize}
+\item JavaScript numbers defined to be double precision floating point
+\item For efficiency, implementations store and operate on them as
+  integers whenever possible
+\item IonMonkey will generates type specialized code for integer values
+\item If arithmetic overflows, need to bail out of integer code and
+  promote to doubles
+\item Range analysis could eliminate these overflow checks
+\end{itemize}
+\end{slide}
+
+
+\end{document}
