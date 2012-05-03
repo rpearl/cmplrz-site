@@ -79,6 +79,7 @@
 \end{center}
 \begin{itemize}
 \item Associate each integer temporary with a range: a contiguous subset of $\{-\infty\} \cup [-2^{31}, 2^{31}-1] \cup \{\infty\}$
+\item Infinite ranges indicate the operation can overflow; arithmetic operations with a finite range don't need overflow checks!
 \item Can do arithmetic on ranges:
 \end{itemize}
 \begin{eqnarray*}
@@ -126,6 +127,63 @@ y = Phi(y1, y4);
 }
 \end{slide}
 
+\begin{slide}
+\begin{center}
+{\Huge \bf{Range Analysis Algorithm}}
+\end{center}
+\begin{itemize}
+\item Range analysis is simple and worklist based. Range recomputation is done with range arithmetic. $\beta$ intersects a range, $\phi$ unions.
+\item Key insight: can always squash inputs to a finite range, since they would have bailed out if they overflowed.
+\end{itemize}
+{\tiny
+\begin{verbatim}
+def propagateRanges(graph):
+    worklist = []
+    for block in reversePostOrder(graph):
+        for insn in block:
+            insn.recomputeRange()
+            if !insn.isPhi() and !insn.isBeta():
+                continue
+            worklist.appendAll(insn.uses())
+
+    while len(worklist) > 0:
+        insn = worklist.pop()
+        #recomputeRange() returns true if the range changed
+        if (insn.recomputeRange()):
+            worklist.appendAll(insn.uses())
+\end{verbatim}
+}
+\end{slide}
+
+\begin{slide}
+\begin{center}
+{\Huge \bf{Results}}
+\end{center}
+\begin{itemize}
+\item Instrumented IonMonkey to output percentage of adds and
+  subtracts eliminated on a number of standard benchmark tests
+\item Encouraging results
+\end{itemize}
+\centering
+\includegraphics[width=0.98\textwidth]{counts_graph.png}
+\end{slide}
+
+
+\begin{slide}
+\begin{center}
+{\Huge \bf{Results }}
+\end{center}
+\begin{itemize}
+\item Tested with three benchmark suites: v8bench, Sunspider, and Kraken
+\item No statistically significant effect on v8bench
+\item Tiny performance regression on Sunspider (0.1\%)
+\item 1.5\% performance improvement on Kraken
+\item Real overall wins, but not much.
+\item Branch prediction is good these days, overflow checks wind up as
+  noise in real programs
+\item Microbenchmarks can see 30\% improvement
+\end{itemize}
+\end{slide}
 
 
 \end{document}
