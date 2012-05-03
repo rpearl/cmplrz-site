@@ -7,6 +7,7 @@
 \usepackage{amsmath,amsthm,amssymb,color}
 %\usepackage{multicol}
 \usepackage{graphicx}
+\usepackage{fullpage}
 \usepackage{hyperref}
 %\usepackage{courier}
 \usepackage{listings}
@@ -18,6 +19,21 @@
 \newcommand{\Range}{\mathsf{Range}}
 
 \let\x\cdot
+\lstset{
+  language=Python,
+  showstringspaces=false,
+  tabsize=4,
+  basicstyle=\ttfamily,
+  keywordstyle=\bfseries\ttfamily,
+  captionpos=b
+}
+\lstdefinelanguage{JavaScript}{
+  keywords={if,else,var},
+  keywordstyle=\bfseries\ttfamily,
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/}
+}
 
 
 \begin{document}
@@ -44,7 +60,7 @@
 
 \begin{slide}
 \begin{center}
-{\Huge \bf{JavaScript arithmetic}}
+{\Huge \bf{JavaScript Arithmetic}}
 \end{center}
 \begin{itemize}
 \item JavaScript numbers defined to be double precision floating point
@@ -56,6 +72,60 @@
 \item Range analysis could eliminate these overflow checks
 \end{itemize}
 \end{slide}
+
+\begin{slide}
+\begin{center}
+{\Huge \bf{Range Analysis}}
+\end{center}
+\begin{itemize}
+\item Associate each integer temporary with a range: a contiguous subset of $\{-\infty\} \cup [-2^{31}, 2^{31}-1] \cup \{\infty\}$
+\item Can do arithmetic on ranges:
+\end{itemize}
+\begin{eqnarray*}
+\Clamp(n) &=& \begin{cases}
+-\infty &\text{if } n < -2^{31} \\
+\infty &\text{if } n > -2^{31}-1 \\
+n&\text{otherwise } \\
+\end{cases}\\
+\Clamp([l, h]) &=& [\Clamp(l), \Clamp(h)] \\
+{[x_l, x_h] \cup [y_l, y_h]} &=& [\min(x_l, y_l), \max(x_h, y_h)] \\
+{[x_l, x_h] \cap [y_l, y_h]} &=& [\max(x_l, y_l), \min(x_h, y_h)] \\
+{[x_l, x_h] + [y_l, y_h]} &=& \Clamp ([x_l + y_l, x_h + y_h]) \\
+{[x_l, x_h] - [y_l, y_h]} &=& \Clamp ([x_l - y_h, x_h - y_l])
+\end{eqnarray*}
+\end{slide}
+
+
+\begin{slide}
+\begin{center}
+{\Huge \bf{XSA Form}}
+\end{center}
+\begin{itemize}
+\item Want a way to track information learned from conditionals without needing to consider more than one range per temp
+\item Introduce $\beta$ nodes to associate range information from conditionals with temporaries
+\item Some example code with $\beta$ nodes; all of the ranges checks can be eliminated
+\end{itemize}
+{\tiny
+\begin{verbatim}
+if (x < 0) {
+    x1 = Beta(x, [INT_MIN, -1]);
+    y1 = x1 + 2000000000;
+} else {
+    x2 = Beta(x, [0, INT_MAX]);
+    if (x2 < 1000000000) {
+        x3 = Beta(x2, [INT_MIN, 999999999]);
+        y2 = x3*2;
+    } else {
+        x4 = Beta(x2, [1000000000, INT_MAX]);
+        y3 = x4 - 3000000000;
+    }
+    y4 = Phi(y2, y3);
+}
+y = Phi(y1, y4);
+\end{verbatim}
+}
+\end{slide}
+
 
 
 \end{document}
